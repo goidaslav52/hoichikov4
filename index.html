@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>База знаний и Парламент</title>
+    <title>База знаний | hoichikov4.org</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Phosphor Icons -->
@@ -14,10 +14,7 @@
             theme: {
                 extend: {
                     colors: {
-                        slate: {
-                            850: '#131e32',
-                            950: '#070d19'
-                        }
+                        slate: { 850: '#131e32', 950: '#070d19' }
                     }
                 }
             }
@@ -36,9 +33,6 @@
             background-size: 20px 20px;
             background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
         }
-        .party-row.dragging { opacity: 0.4; border-style: dashed; border-color: #6366f1; }
-        .drag-handle { cursor: grab; user-select: none; }
-        .drag-handle:active { cursor: grabbing; }
     </style>
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col font-sans antialiased selection:bg-indigo-500 selection:text-white">
@@ -49,10 +43,10 @@
         <span id="toastMsg" class="text-sm font-medium">Действие выполнено</span>
     </div>
 
-    <!-- Header Navigation & Search -->
+    <!-- Header Navigation -->
     <header class="bg-slate-900/90 border-b border-slate-800 sticky top-0 z-40 backdrop-blur-md">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex flex-col sm:flex-row items-center justify-between gap-3 py-3">
-            <div class="flex items-center gap-3">
+            <div class="flex items-center gap-3 cursor-pointer" onclick="switchTab('main')">
                 <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-500 flex items-center justify-center shadow-lg shadow-indigo-500/20">
                     <i class="ph ph-buildings text-white text-xl"></i>
                 </div>
@@ -62,32 +56,33 @@
                 </div>
             </div>
 
-            <div class="flex items-center gap-4 w-full sm:w-auto justify-end">
+            <div class="flex items-center gap-4 w-full sm:w-auto justify-end flex-wrap">
                 <input type="text" id="searchBox" placeholder="Поиск или секретный код..." 
-                    class="bg-slate-950 border border-slate-700 text-slate-200 placeholder-slate-500 rounded-lg px-3.5 py-1.5 text-xs w-full sm:w-64 focus:ring-2 focus:ring-indigo-500 outline-none">
+                    class="bg-slate-950 border border-slate-700 text-slate-200 placeholder-slate-500 rounded-lg px-3.5 py-1.5 text-xs w-full sm:w-56 focus:ring-2 focus:ring-indigo-500 outline-none">
 
                 <nav class="flex items-center gap-2">
                     <button onclick="switchTab('main')" id="btn-main" class="px-3.5 py-2 text-xs font-semibold rounded-lg bg-slate-800 text-slate-200 hover:bg-slate-700 transition">Главная</button>
                     <button onclick="switchTab('parliament')" id="btn-parliament" class="px-3.5 py-2 text-xs font-semibold rounded-lg bg-slate-800 text-slate-200 hover:bg-slate-700 transition">Парламент</button>
+                    <button onclick="switchTab('contact')" id="btn-contact" class="px-3.5 py-2 text-xs font-semibold rounded-lg bg-slate-800 text-slate-200 hover:bg-slate-700 transition">Связь со мной</button>
                 </nav>
             </div>
         </div>
     </header>
 
-    <!-- Main Content Body -->
+    <!-- Main Body Sections -->
     <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8">
 
         <!-- TAB 1: MAIN HOME -->
         <div id="tab-main" class="section active space-y-6">
-            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl">
-                <h2 class="text-xl font-bold text-white mb-2">Добро пожаловать в Хранилище</h2>
-                <p class="text-sm text-slate-400">Используйте навигацию в шапке сайта или перейдите в раздел парламента.</p>
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl max-w-2xl mx-auto mt-10">
+                <h2 class="text-xl font-bold text-white mb-2">База знаний и Хранилище</h2>
+                <p class="text-sm text-slate-400 mb-4">Введите поисковый запрос (или секретный код):</p>
                 
                 <div id="secretMenu" class="mt-6 p-5 bg-indigo-950/40 border border-indigo-800/60 rounded-xl hidden">
                     <h3 class="text-sm font-bold text-indigo-300 flex items-center gap-2 mb-1">
                         <i class="ph ph-lock-key-open text-base"></i> Секретное меню администратора
                     </h3>
-                    <p class="text-xs text-slate-300">Секретный код <code>12221</code> успешно принят.</p>
+                    <p class="text-xs text-slate-300">Секретный код <code>12221</code> успешно принят. Доступ к управлению открыт.</p>
                 </div>
             </div>
         </div>
@@ -95,8 +90,6 @@
         <!-- TAB 2: PARLIAMENT GENERATOR -->
         <div id="tab-parliament" class="section">
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-
-                <!-- Left Column: Controls & Party Editor -->
                 <div class="lg:col-span-5 flex flex-col gap-6">
                     <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl">
                         <div class="flex items-center justify-between mb-4">
@@ -104,7 +97,7 @@
                                 <h2 class="text-base font-bold text-white flex items-center gap-2">
                                     <i class="ph ph-users-three text-indigo-400 text-lg"></i> Фракции и Партии
                                 </h2>
-                                <p class="text-[11px] text-slate-400">Перетаскивайте фракции для сортировки</p>
+                                <p class="text-[11px] text-slate-400">Настройка мандатов</p>
                             </div>
                             <span id="totalSeatsBadge" class="px-3 py-1 bg-indigo-950 text-indigo-300 border border-indigo-800 rounded-full text-xs font-bold font-mono">0 мест</span>
                         </div>
@@ -120,34 +113,28 @@
                             <div id="majorityPercentage" class="text-xs font-semibold text-indigo-400 bg-indigo-950/80 px-2.5 py-1 rounded-lg border border-indigo-900/60 font-mono">--</div>
                         </div>
 
-                        <!-- Add Party Form -->
                         <form id="addPartyForm" onsubmit="event.preventDefault(); submitAddParty(); return false;" class="bg-slate-950 border border-slate-800 p-3.5 rounded-xl mb-4 space-y-3">
-                            <div class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider flex justify-between items-center">
-                                <span>Добавить партию</span>
-                                <span class="text-indigo-400">Палитра</span>
-                            </div>
+                            <div class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Добавить партию</div>
                             <div class="grid grid-cols-12 gap-2">
                                 <div class="col-span-6">
-                                    <input type="text" id="newPartyName" placeholder="Название партии" required
-                                        class="w-full bg-slate-900 border border-slate-700 text-slate-100 placeholder-slate-500 rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-indigo-500 outline-none">
+                                    <input type="text" id="newPartyName" placeholder="Название" required
+                                        class="w-full bg-slate-900 border border-slate-700 text-slate-100 rounded-lg px-3 py-2 text-xs outline-none">
                                 </div>
                                 <div class="col-span-3">
                                     <input type="number" id="newPartySeats" min="1" max="10000" placeholder="Мест" required
-                                        class="w-full bg-slate-900 border border-slate-700 text-slate-100 placeholder-slate-500 rounded-lg px-2.5 py-2 text-xs font-mono focus:ring-2 focus:ring-indigo-500 outline-none">
+                                        class="w-full bg-slate-900 border border-slate-700 text-slate-100 rounded-lg px-2.5 py-2 text-xs font-mono outline-none">
                                 </div>
                                 <div class="col-span-3 flex items-center gap-1.5">
                                     <input type="color" id="newPartyColor" value="#ef4444" class="w-9 h-9 rounded-lg border border-slate-700 bg-slate-900 cursor-pointer p-0.5">
-                                    <button type="button" onclick="submitAddParty()" class="flex-1 h-9 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold rounded-lg text-xs transition flex items-center justify-center shadow-lg shadow-indigo-600/30">
+                                    <button type="button" onclick="submitAddParty()" class="flex-1 h-9 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-xs flex items-center justify-center">
                                         <i class="ph ph-plus text-base"></i>
                                     </button>
                                 </div>
                             </div>
                         </form>
-
                         <div id="partiesContainer" class="space-y-2 max-h-[360px] overflow-y-auto pr-1"></div>
                     </div>
 
-                    <!-- Geometry Settings -->
                     <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl space-y-4">
                         <h2 class="text-base font-bold text-white flex items-center gap-2">
                             <i class="ph ph-sliders text-indigo-400 text-lg"></i> Настройки схемы
@@ -157,46 +144,34 @@
                             <input type="text" id="cfgTitle" value="Парламентская Ассамблея" oninput="updateDiagram()"
                                 class="w-full bg-slate-950 border border-slate-700 text-slate-100 rounded-lg px-3 py-2 text-xs outline-none">
                         </div>
-                        <div class="space-y-2">
-                            <label class="block text-xs font-semibold text-slate-300">Подзаголовок</label>
-                            <input type="text" id="cfgSubtitle" value="Распределение 5000 мест по фракциям" oninput="updateDiagram()"
-                                class="w-full bg-slate-950 border border-slate-700 text-slate-100 rounded-lg px-3 py-2 text-xs outline-none">
-                        </div>
                         <div class="grid grid-cols-2 gap-3 pt-2">
                             <div>
-                                <label class="block text-xs font-semibold text-slate-300 mb-1">Форма мест</label>
+                                <label class="block text-xs font-semibold text-slate-300 mb-1">Форма</label>
                                 <select id="cfgShape" onchange="updateDiagram()" class="w-full bg-slate-950 border border-slate-700 text-slate-200 rounded-lg px-2.5 py-2 text-xs outline-none">
                                     <option value="circle">Точки</option>
                                     <option value="square">Квадраты</option>
-                                    <option value="rounded">Скруглённые</option>
                                 </select>
                             </div>
                             <div>
-                                <label class="block text-xs font-semibold text-slate-300 mb-1">Фон схемы</label>
+                                <label class="block text-xs font-semibold text-slate-300 mb-1">Фон</label>
                                 <select id="cfgBg" onchange="updateDiagram()" class="w-full bg-slate-950 border border-slate-700 text-slate-200 rounded-lg px-2.5 py-2 text-xs outline-none">
                                     <option value="#000000">Чёрный</option>
                                     <option value="#0f172a" selected>Тёмно-синий</option>
                                     <option value="#ffffff">Белый</option>
-                                    <option value="transparent">Прозрачный</option>
                                 </select>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Right Column: Live Viewer & Export -->
                 <div class="lg:col-span-7 flex flex-col gap-4">
                     <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl flex flex-col flex-1">
                         <div class="flex items-center justify-between mb-4">
                             <h2 class="text-base font-bold text-white flex items-center gap-2">
                                 <i class="ph ph-eye text-indigo-400 text-lg"></i> Просмотр Диаграммы
                             </h2>
-                            <div class="flex items-center gap-2">
-                                <button type="button" onclick="downloadSVG()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-lg border border-slate-700 transition">SVG</button>
-                                <button type="button" onclick="downloadPNG()" class="px-3.5 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-lg transition shadow-lg">Скачать PNG</button>
-                            </div>
+                            <button type="button" onclick="downloadPNG()" class="px-3.5 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-lg transition">Скачать PNG</button>
                         </div>
-
                         <div id="svgFrame" class="w-full flex-1 min-h-[480px] bg-slate-950 border border-slate-800 rounded-xl flex items-center justify-center p-3 relative overflow-hidden">
                             <svg id="parliamentSvg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1050" class="w-full h-auto max-h-[700px] drop-shadow-2xl"></svg>
                         </div>
@@ -205,8 +180,54 @@
                 </div>
             </div>
         </div>
+
+        <!-- TAB 3: CONTACT PAGE -->
+        <div id="tab-contact" class="section space-y-6">
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-8 shadow-xl max-w-xl mx-auto mt-10 space-y-6">
+                <div>
+                    <h2 class="text-2xl font-bold text-white mb-1 flex items-center gap-3">
+                        <i class="ph ph-address-book text-indigo-400"></i> Связь со мной
+                    </h2>
+                    <p class="text-sm text-slate-400">Свяжитесь со мной по электронной почте или в мессенджере.</p>
+                </div>
+
+                <div class="space-y-4 pt-2">
+                    <div class="bg-slate-950 border border-slate-800 rounded-xl p-4 flex items-center gap-4">
+                        <div class="w-10 h-10 rounded-lg bg-indigo-950 border border-indigo-800 flex items-center justify-center text-indigo-400 text-xl shrink-0">
+                            <i class="ph ph-envelope"></i>
+                        </div>
+                        <div>
+                            <div class="text-xs text-slate-400 font-medium">Электронная почта</div>
+                            <a href="mailto:GOIDA52@hoichikov4.org" class="text-sm font-bold text-indigo-300 hover:underline">GOIDA52@hoichikov4.org</a>
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-950 border border-slate-800 rounded-xl p-4 flex items-center gap-4">
+                        <div class="w-10 h-10 rounded-lg bg-indigo-950 border border-indigo-800 flex items-center justify-center text-indigo-400 text-xl shrink-0">
+                            <i class="ph ph-telegram-logo"></i>
+                        </div>
+                        <div>
+                            <div class="text-xs text-slate-400 font-medium">Telegram юзер</div>
+                            <a href="https://t.me/hoichikov4" target="_blank" class="text-sm font-bold text-indigo-300 hover:underline">@hoichikov4</a>
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-950 border border-slate-800 rounded-xl p-4 flex items-center gap-4">
+                        <div class="w-10 h-10 rounded-lg bg-indigo-950 border border-indigo-800 flex items-center justify-center text-indigo-400 text-xl shrink-0">
+                            <i class="ph ph-broadcast"></i>
+                        </div>
+                        <div>
+                            <div class="text-xs text-slate-400 font-medium">Подписка на канал</div>
+                            <a href="https://t.me/+c8AQnJdoYABhYzk6" target="_blank" class="text-sm font-bold text-indigo-300 hover:underline">Открыть канал в Telegram</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </main>
 
+    <!-- JavaScript Controller -->
     <script>
         let parties = [
             { id: 1, name: 'Левый Фронт', seats: 1200, color: '#ef4444' },
@@ -220,25 +241,32 @@
         function switchTab(tabName) {
             document.querySelectorAll('.section').forEach(el => el.classList.remove('active'));
             document.getElementById('tab-' + tabName).classList.add('active');
+            
             if (tabName === 'parliament') {
                 history.pushState(null, '', '/parlament');
                 updateDiagram();
+            } else if (tabName === 'contact') {
+                history.pushState(null, '', '/contact');
             } else {
                 history.pushState(null, '', '/');
             }
         }
 
-        // Авто-открытие вкладки парламента при переходе по ссылке /parlament
+        // Авто-переключение при загрузке по путям /parlament или /contact
         if (window.location.pathname.includes('parlament')) {
             switchTab('parliament');
+        } else if (window.location.pathname.includes('contact')) {
+            switchTab('contact');
         }
 
+        // Секретный код 12221
         const searchBox = document.getElementById('searchBox');
         const secretMenu = document.getElementById('secretMenu');
         searchBox.addEventListener('input', (e) => {
             if (e.target.value.trim() === '12221') {
                 secretMenu.classList.remove('hidden');
                 searchBox.value = '';
+                showToast('Секретный код принят!');
             }
         });
 
@@ -264,7 +292,7 @@
             document.getElementById('newPartySeats').value = '';
             renderPartyList();
             updateDiagram();
-            showToast(`Фракция добавлена`);
+            showToast('Фракция добавлена');
         }
 
         function deleteParty(idx) {
@@ -337,11 +365,9 @@
             const shape = document.getElementById('cfgShape').value;
             const bgColor = document.getElementById('cfgBg').value;
             const titleText = document.getElementById('cfgTitle').value.trim();
-            const subtitleText = document.getElementById('cfgSubtitle').value.trim();
 
             const frame = document.getElementById('svgFrame');
-            frame.style.backgroundColor = bgColor === 'transparent' ? 'transparent' : bgColor;
-            if(bgColor === 'transparent') frame.className = 'w-full flex-1 min-h-[480px] border border-slate-800 rounded-xl flex items-center justify-center p-3 relative overflow-hidden bg-checkered';
+            frame.style.backgroundColor = bgColor;
 
             const stepR = numRows > 1 ? (680 - 260) / (numRows - 1) : 40;
             const spotRadius = Math.max(0.6, stepR * 0.38);
@@ -369,22 +395,14 @@
             });
 
             const svgContent = `
-                <rect width="1600" height="1050" fill="${bgColor === 'transparent' ? 'none' : bgColor}" />
+                <rect width="1600" height="1050" fill="${bgColor}" />
                 ${titleText ? `<text x="800" y="75" text-anchor="middle" fill="#fff" font-size="40" font-weight="800">${titleText}</text>` : ''}
-                ${subtitleText ? `<text x="800" y="118" text-anchor="middle" fill="#94a3b8" font-size="20">${subtitleText}</text>` : ''}
                 <g>${seatsSvgMarkup}</g>
                 <text x="800" y="795" text-anchor="middle" fill="#fff" font-size="52" font-weight="900">${totalSeats.toLocaleString()}</text>
                 <g>${legendMarkup}</g>
             `;
             document.getElementById('parliamentSvg').innerHTML = svgContent;
             document.getElementById('svgRawOutput').value = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1050" width="1600" height="1050">${svgContent}</svg>`;
-        }
-
-        function downloadSVG() {
-            const blob = new Blob([document.getElementById('svgRawOutput').value], { type: 'image/svg+xml;charset=utf-8' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a'); a.href = url; a.download = 'parliament.svg';
-            a.click(); URL.revokeObjectURL(url);
         }
 
         function downloadPNG() {
