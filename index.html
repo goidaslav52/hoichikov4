@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Мое Хранилище</title>
+    <style>
+        body { font-family: sans-serif; background: #121212; color: #e0e0e0; padding: 40px; }
+        input { padding: 10px; width: 300px; font-size: 16px; background: #222; color: #fff; border: 1px solid #444; }
+        .secret-menu { display: none; margin-top: 20px; padding: 20px; background: #1e3a1e; border: 1px solid #2e7d32; }
+    </style>
+</head>
+<body>
+
+    <h1>База знаний и Хранилище</h1>
+    <p>Введите поисковый запрос (или секретный код):</p>
+    
+    <!-- Строка поиска -->
+    <input type="text" id="searchBox" placeholder="Поиск или код...">
+
+    <!-- Скрытое меню, которое открывается по коду 12221 -->
+    <div id="secretMenu" class="secret-menu">
+        <h2>🔒 Секретное меню администратора</h2>
+        <p>Добро пожаловать в скрытый раздел! Сюда можно добавить загрузку файлов и схемы парламентов.</p>
+    </div>
+
+    <script>
+        const searchBox = document.getElementById('searchBox');
+        const secretMenu = document.getElementById('secretMenu');
+
+        searchBox.addEventListener('input', (e) => {
+            if (e.target.value.trim() === '12221') {
+                secretMenu.style.display = 'block'; // Показываем секретный блок
+                searchBox.value = ''; // Очищаем строку поиска
+            }
+        });
+    </script>
+
+</body>
+</html>
