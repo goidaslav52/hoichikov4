@@ -14,33 +14,18 @@
             theme: {
                 extend: {
                     colors: {
-                        slate: {
-                            850: '#131e32',
-                            950: '#070d19'
-                        }
+                        slate: { 850: '#131e32', 950: '#070d19' }
                     }
                 }
             }
         }
     </script>
     <style>
-        /* Custom Scrollbars */
-        ::-webkit-scrollbar {
-            width: 6px;
-            height: 6px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #0f172a;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #334155;
-            border-radius: 4px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #475569;
-        }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #0f172a; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #475569; }
 
-        /* Checkered Background pattern for transparent view */
         .bg-checkered {
             background-color: #0f172a;
             background-image: 
@@ -52,19 +37,9 @@
             background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
         }
 
-        .party-row.dragging {
-            opacity: 0.4;
-            border-style: dashed;
-            border-color: #6366f1;
-        }
-
-        .drag-handle {
-            cursor: grab;
-            user-select: none;
-        }
-        .drag-handle:active {
-            cursor: grabbing;
-        }
+        .party-row.dragging { opacity: 0.4; border-style: dashed; border-color: #6366f1; }
+        .drag-handle { cursor: grab; user-select: none; }
+        .drag-handle:active { cursor: grabbing; }
     </style>
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col font-sans antialiased selection:bg-indigo-500 selection:text-white">
@@ -77,9 +52,9 @@
 
     <!-- Header Navigation -->
     <header class="bg-slate-900/90 border-b border-slate-800 sticky top-0 z-40 backdrop-blur-md">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex flex-col sm:flex-row items-center justify-between gap-3 py-3">
             <div class="flex items-center gap-3">
-                <a href="/" class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-500 flex items-center justify-center shadow-lg shadow-indigo-500/20 hover:opacity-90 transition" title="На главную">
+                <a href="/" class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-500 flex items-center justify-center shadow-lg shadow-indigo-500/20 hover:opacity-90 transition">
                     <i class="ph ph-buildings text-white text-xl"></i>
                 </a>
                 <div>
@@ -88,12 +63,12 @@
                 </div>
             </div>
 
-            <!-- Presets Menu Dropdown -->
-            <div class="flex items-center gap-2">
+            <div class="flex items-center gap-3 flex-wrap">
+                <!-- Presets Dropdown -->
                 <div class="relative inline-block text-left group">
                     <button type="button" class="px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-lg border border-slate-700 transition flex items-center gap-2 shadow-sm">
                         <i class="ph ph-sparkle text-amber-400 text-sm"></i>
-                        <span>Пресеты Парламентов</span>
+                        <span>Пресеты</span>
                         <i class="ph ph-caret-down text-slate-400"></i>
                     </button>
                     <div class="hidden group-hover:block group-focus-within:block absolute right-0 mt-1 w-72 bg-slate-900 border border-slate-700 rounded-xl shadow-2xl z-50 py-1.5 backdrop-blur-xl">
@@ -106,7 +81,6 @@
                             <span class="font-medium text-amber-300">Сетка Википедии (Ч/Б)</span>
                             <span class="text-[10px] bg-amber-950 text-amber-300 border border-amber-800 px-1.5 py-0.5 rounded font-mono">5000 мест</span>
                         </button>
-
                         <div class="px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-400 border-b border-slate-800 mt-1">Реальные и Стандартные</div>
                         <button type="button" onclick="loadPreset('danorisia450')" class="w-full text-left px-3.5 py-2 hover:bg-slate-800 text-xs text-slate-200 flex items-center justify-between transition">
                             <span class="font-medium">Данорисия (Палата)</span>
@@ -123,9 +97,11 @@
                     </div>
                 </div>
 
-                <button type="button" onclick="resetToDefault()" class="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium rounded-lg border border-slate-700 transition" title="Сбросить все настройки">
-                    <i class="ph ph-arrow-counter-clockwise text-sm"></i>
-                </button>
+                <nav class="flex items-center gap-2">
+                    <a href="/" class="px-3.5 py-2 text-xs font-semibold rounded-lg bg-slate-800 text-slate-200 hover:bg-slate-700 transition">Главная</a>
+                    <a href="/parlament" class="px-3.5 py-2 text-xs font-semibold rounded-lg bg-indigo-600 text-white shadow-lg shadow-indigo-600/30">Парламент</a>
+                    <a href="/contact" class="px-3.5 py-2 text-xs font-semibold rounded-lg bg-slate-800 text-slate-200 hover:bg-slate-700 transition">Связь</a>
+                </nav>
             </div>
         </div>
     </header>
@@ -174,11 +150,11 @@
                     <div class="grid grid-cols-12 gap-2">
                         <div class="col-span-6">
                             <input type="text" id="newPartyName" placeholder="Название партии" required
-                                class="w-full bg-slate-900 border border-slate-700 text-slate-100 placeholder-slate-500 rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none">
+                                class="w-full bg-slate-900 border border-slate-700 text-slate-100 placeholder-slate-500 rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-indigo-500 outline-none">
                         </div>
                         <div class="col-span-3">
                             <input type="number" id="newPartySeats" min="1" max="10000" placeholder="Мест" required
-                                class="w-full bg-slate-900 border border-slate-700 text-slate-100 placeholder-slate-500 rounded-lg px-2.5 py-2 text-xs font-mono focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none">
+                                class="w-full bg-slate-900 border border-slate-700 text-slate-100 placeholder-slate-500 rounded-lg px-2.5 py-2 text-xs font-mono focus:ring-2 focus:ring-indigo-500 outline-none">
                         </div>
                         <div class="col-span-3 flex items-center gap-1.5">
                             <input type="color" id="newPartyColor" value="#ef4444" 
@@ -205,7 +181,6 @@
                     </div>
                 </form>
 
-                <!-- Interactive Parties Container (Drag & Drop) -->
                 <div id="partiesContainer" class="space-y-2 max-h-[380px] overflow-y-auto pr-1"></div>
             </div>
 
@@ -216,7 +191,7 @@
                 </h2>
 
                 <div class="space-y-2 pt-1 border-t border-slate-800">
-                    <label class="block text-xs font-semibold text-slate-300">Название / Заголовок над схемой</label>
+                    <label class="block text-xs font-semibold text-slate-300">Название над схемой</label>
                     <input type="text" id="cfgTitle" value="Парламентская Ассамблея" oninput="updateDiagram()" placeholder="Например: Горсовет ГОЙДАГРАДА"
                         class="w-full bg-slate-950 border border-slate-700 text-slate-100 placeholder-slate-500 rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-indigo-500 outline-none">
                 </div>
@@ -230,16 +205,15 @@
                 <div class="grid grid-cols-2 gap-3 pt-2">
                     <div>
                         <label class="block text-xs font-semibold text-slate-300 mb-1">Форма мест</label>
-                        <select id="cfgShape" onchange="updateDiagram()" class="w-full bg-slate-950 border border-slate-700 text-slate-200 rounded-lg px-2.5 py-2 text-xs focus:ring-2 focus:ring-indigo-500 outline-none">
+                        <select id="cfgShape" onchange="updateDiagram()" class="w-full bg-slate-950 border border-slate-700 text-slate-200 rounded-lg px-2.5 py-2 text-xs outline-none">
                             <option value="circle">Точки (Круги)</option>
-                            <option value="square">Квадраты (Википедия)</option>
-                            <option value="rounded">Скруглённые квадраты</option>
+                            <option value="square">Квадраты</option>
+                            <option value="rounded">Скруглённые</option>
                         </select>
                     </div>
-
                     <div>
                         <label class="block text-xs font-semibold text-slate-300 mb-1">Фон схемы</label>
-                        <select id="cfgBg" onchange="updateDiagram()" class="w-full bg-slate-950 border border-slate-700 text-slate-200 rounded-lg px-2.5 py-2 text-xs focus:ring-2 focus:ring-indigo-500 outline-none">
+                        <select id="cfgBg" onchange="updateDiagram()" class="w-full bg-slate-950 border border-slate-700 text-slate-200 rounded-lg px-2.5 py-2 text-xs outline-none">
                             <option value="#000000">Чёрный (#000000)</option>
                             <option value="#0f172a" selected>Тёмно-синий (#0f172a)</option>
                             <option value="#ffffff">Белый (#ffffff)</option>
@@ -256,10 +230,9 @@
                         </div>
                         <input type="range" id="cfgSize" min="0.4" max="2.2" step="0.1" value="1.0" oninput="updateDiagram()" class="w-full accent-indigo-500 bg-slate-800 rounded-lg cursor-pointer h-1.5">
                     </div>
-
                     <div>
                         <div class="flex justify-between text-xs mb-1">
-                            <span class="text-slate-300 font-medium">Количество рядов (дуг)</span>
+                            <span class="text-slate-300 font-medium">Количество рядов</span>
                             <span id="cfgRowsVal" class="text-indigo-400 font-mono font-bold">Авто</span>
                         </div>
                         <div class="flex items-center gap-3">
@@ -274,7 +247,7 @@
             </div>
         </div>
 
-        <!-- Right Column: Live Diagram Viewer & SVG/PNG Export -->
+        <!-- Right Column: Diagram Viewer & Export -->
         <div class="lg:col-span-7 flex flex-col gap-4">
             <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl flex flex-col flex-1">
                 <div class="flex items-center justify-between mb-4">
@@ -297,8 +270,7 @@
                 </div>
 
                 <div id="svgFrame" class="w-full flex-1 min-h-[480px] bg-slate-950 border border-slate-800 rounded-xl flex items-center justify-center p-3 relative overflow-hidden">
-                    <svg id="parliamentSvg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1050" class="w-full h-auto max-h-[700px] drop-shadow-2xl">
-                    </svg>
+                    <svg id="parliamentSvg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1050" class="w-full h-auto max-h-[700px] drop-shadow-2xl"></svg>
                 </div>
             </div>
 
@@ -332,20 +304,15 @@
             const toast = document.getElementById('toast');
             document.getElementById('toastMsg').textContent = msg;
             toast.classList.remove('translate-y-[-100px]', 'opacity-0');
-            setTimeout(() => {
-                toast.classList.add('translate-y-[-100px]', 'opacity-0');
-            }, 2500);
+            setTimeout(() => toast.classList.add('translate-y-[-100px]', 'opacity-0'), 2500);
         }
 
-        function setQuickColor(hex) {
-            document.getElementById('newPartyColor').value = hex;
-        }
+        function setQuickColor(hex) { document.getElementById('newPartyColor').value = hex; }
 
         function submitAddParty() {
             const nameInput = document.getElementById('newPartyName');
             const seatsInput = document.getElementById('newPartySeats');
             const colorInput = document.getElementById('newPartyColor');
-
             const name = nameInput.value.trim();
             const seats = parseInt(seatsInput.value, 10);
             const color = colorInput.value;
@@ -356,18 +323,14 @@
             }
 
             parties.push({ id: Date.now(), name, seats, color });
-            nameInput.value = '';
-            seatsInput.value = '';
-
-            renderPartyList();
-            updateDiagram();
+            nameInput.value = ''; seatsInput.value = '';
+            renderPartyList(); updateDiagram();
             showToast(`Фракция «${name}» добавлена`);
         }
 
         function deleteParty(index) {
             const removed = parties.splice(index, 1);
-            renderPartyList();
-            updateDiagram();
+            renderPartyList(); updateDiagram();
             if (removed.length) showToast(`Удалено: ${removed[0].name}`);
         }
 
@@ -377,27 +340,16 @@
             const temp = parties[index];
             parties[index] = parties[targetIndex];
             parties[targetIndex] = temp;
-            renderPartyList();
-            updateDiagram();
+            renderPartyList(); updateDiagram();
         }
 
         function updateSeats(index, value) {
             const seats = parseInt(value, 10);
-            if (!isNaN(seats) && seats >= 1) {
-                parties[index].seats = seats;
-                updateDiagram();
-            }
+            if (!isNaN(seats) && seats >= 1) { parties[index].seats = seats; updateDiagram(); }
         }
 
-        function updatePartyName(index, value) {
-            parties[index].name = value.trim() || 'Без названия';
-            updateDiagram();
-        }
-
-        function updatePartyColor(index, colorHex) {
-            parties[index].color = colorHex;
-            updateDiagram();
-        }
+        function updatePartyName(index, value) { parties[index].name = value.trim() || 'Без названия'; updateDiagram(); }
+        function updatePartyColor(index, colorHex) { parties[index].color = colorHex; updateDiagram(); }
 
         function renderPartyList() {
             const container = document.getElementById('partiesContainer');
@@ -418,9 +370,7 @@
                 return `
                     <div class="party-row bg-slate-950 border border-slate-800 hover:border-slate-700 rounded-xl p-2.5 flex items-center gap-2 transition group"
                          draggable="true" ondragstart="handleDragStart(event, ${idx})" ondragover="handleDragOver(event)" ondrop="handleDrop(event, ${idx})" ondragend="handleDragEnd(event)">
-                        <div class="drag-handle text-slate-600 hover:text-slate-300 px-1" title="Перетащите для сортировки">
-                            <i class="ph ph-dots-six-vertical text-base"></i>
-                        </div>
+                        <div class="drag-handle text-slate-600 hover:text-slate-300 px-1"><i class="ph ph-dots-six-vertical text-base"></i></div>
                         <input type="color" value="${p.color}" onchange="updatePartyColor(${idx}, this.value)" class="w-6 h-6 rounded-md border border-slate-700 bg-transparent cursor-pointer p-0 shrink-0">
                         <div class="flex-1 min-w-0">
                             <input type="text" value="${escapeHtml(p.name)}" onchange="updatePartyName(${idx}, this.value)" class="w-full bg-transparent text-slate-100 text-xs font-semibold focus:bg-slate-900 focus:px-1 rounded outline-none truncate">
@@ -447,8 +397,7 @@
             const movedItem = parties.splice(draggedIndex, 1)[0];
             parties.splice(targetIdx, 0, movedItem);
             draggedIndex = null;
-            renderPartyList();
-            updateDiagram();
+            renderPartyList(); updateDiagram();
         }
         function handleDragEnd(e) { e.target.classList.remove('dragging'); draggedIndex = null; }
 
@@ -510,9 +459,7 @@
 
             document.getElementById('cfgAutoRows').checked = true;
             document.getElementById('cfgRows').disabled = true;
-            renderPartyList();
-            updateDiagram();
-            showToast('Пресет загружен');
+            renderPartyList(); updateDiagram(); showToast('Пресет загружен');
         }
 
         function resetToDefault() { loadPreset('danorisia5000'); }
@@ -522,24 +469,19 @@
             let rows = numRowsOverride || Math.max(2, Math.min(80, Math.round(0.55 * Math.sqrt(totalSeats))));
             const rMin = 260, rMax = 680, cx = 800, cy = 820;
 
-            const radii = [];
-            let sumRadii = 0;
+            const radii = []; let sumRadii = 0;
             for (let i = 0; i < rows; i++) {
                 const r = rows === 1 ? rMax : rMin + (i * (rMax - rMin) / (rows - 1));
-                radii.push(r);
-                sumRadii += r;
+                radii.push(r); sumRadii += r;
             }
 
-            const spotsPerRow = [];
-            let allocated = 0;
+            const spotsPerRow = []; let allocated = 0;
             for (let i = 0; i < rows; i++) {
                 let count = Math.round(totalSeats * (radii[i] / sumRadii));
-                spotsPerRow.push(count);
-                allocated += count;
+                spotsPerRow.push(count); allocated += count;
             }
 
-            let diff = totalSeats - allocated;
-            let rIdx = rows - 1;
+            let diff = totalSeats - allocated; let rIdx = rows - 1;
             while (diff !== 0) {
                 if (diff > 0) { spotsPerRow[rIdx]++; diff--; }
                 else if (spotsPerRow[rIdx] > 1) { spotsPerRow[rIdx]--; diff++; }
@@ -548,17 +490,14 @@
 
             const spots = [];
             for (let i = 0; i < rows; i++) {
-                const r = radii[i];
-                const count = spotsPerRow[i];
+                const r = radii[i]; const count = spotsPerRow[i];
                 for (let j = 0; j < count; j++) {
                     const angle = Math.PI - ((j + 0.5) / count) * Math.PI;
-                    const x = cx + r * Math.cos(angle);
-                    const y = cy - r * Math.sin(angle);
-                    spots.push({ x, y, r, angle, row: i });
+                    spots.push({ x: cx + r * Math.cos(angle), y: cy - r * Math.sin(angle), angle });
                 }
             }
 
-            spots.sort((a, b) => b.angle - a.angle || a.r - b.r);
+            spots.sort((a, b) => b.angle - a.angle);
             return { spots, numRows: rows };
         }
 
@@ -604,28 +543,20 @@
             const textPrimary = isLightBg ? '#0f172a' : '#ffffff';
             const textSecondary = isLightBg ? '#475569' : '#94a3b8';
 
-            let spotIdx = 0;
-            let seatsSvgMarkup = '';
-
+            let spotIdx = 0; let seatsSvgMarkup = '';
             parties.forEach(party => {
                 for (let i = 0; i < party.seats; i++) {
                     if (spotIdx >= spots.length) break;
                     const spot = spots[spotIdx];
-                    const color = party.color;
-
                     if (shape === 'circle') {
-                        seatsSvgMarkup += `<circle cx="${spot.x.toFixed(2)}" cy="${spot.y.toFixed(2)}" r="${spotRadius.toFixed(2)}" fill="${color}" />`;
+                        seatsSvgMarkup += `<circle cx="${spot.x.toFixed(2)}" cy="${spot.y.toFixed(2)}" r="${spotRadius.toFixed(2)}" fill="${party.color}" />`;
                     } else if (shape === 'square') {
                         const s = (spotRadius * 1.75).toFixed(2);
-                        const x = (spot.x - spotRadius * 0.875).toFixed(2);
-                        const y = (spot.y - spotRadius * 0.875).toFixed(2);
-                        seatsSvgMarkup += `<rect x="${x}" y="${y}" width="${s}" height="${s}" fill="${color}" />`;
+                        seatsSvgMarkup += `<rect x="${(spot.x - spotRadius*0.875).toFixed(2)}" y="${(spot.y - spotRadius*0.875).toFixed(2)}" width="${s}" height="${s}" fill="${party.color}" />`;
                     } else if (shape === 'rounded') {
                         const s = (spotRadius * 1.75).toFixed(2);
-                        const x = (spot.x - spotRadius * 0.875).toFixed(2);
-                        const y = (spot.y - spotRadius * 0.875).toFixed(2);
                         const rx = (spotRadius * 0.4).toFixed(2);
-                        seatsSvgMarkup += `<rect x="${x}" y="${y}" width="${s}" height="${s}" rx="${rx}" fill="${color}" />`;
+                        seatsSvgMarkup += `<rect x="${(spot.x - spotRadius*0.875).toFixed(2)}" y="${(spot.y - spotRadius*0.875).toFixed(2)}" width="${s}" height="${s}" rx="${rx}" fill="${party.color}" />`;
                     }
                     spotIdx++;
                 }
@@ -639,7 +570,6 @@
                 const lx = 120 + col * 480;
                 const ly = 910 + row * 34;
                 const pct = totalSeats ? ((p.seats / totalSeats) * 100).toFixed(1) : 0;
-
                 legendMarkup += `
                     <g transform="translate(${lx}, ${ly})">
                         <circle cx="12" cy="0" r="9" fill="${p.color}" />
@@ -674,8 +604,7 @@
         function downloadSVG() {
             const blob = new Blob([document.getElementById('svgRawOutput').value], { type: 'image/svg+xml;charset=utf-8' });
             const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url; a.download = 'parliament_diagram.svg';
+            const a = document.createElement('a'); a.href = url; a.download = 'parliament_diagram.svg';
             document.body.appendChild(a); a.click(); document.body.removeChild(a);
             URL.revokeObjectURL(url);
             showToast('SVG файл скачан');
@@ -683,20 +612,15 @@
 
         function downloadPNG() {
             const svgString = new XMLSerializer().serializeToString(document.getElementById('parliamentSvg'));
-            const canvas = document.createElement('canvas');
-            canvas.width = 3200; canvas.height = 2100;
-            const ctx = canvas.getContext('2d');
-            const img = new Image();
+            const canvas = document.createElement('canvas'); canvas.width = 3200; canvas.height = 2100;
+            const ctx = canvas.getContext('2d'); const img = new Image();
             const blob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
             const url = URL.createObjectURL(blob);
             img.onload = function() {
                 ctx.drawImage(img, 0, 0, 3200, 2100);
                 URL.revokeObjectURL(url);
-                const a = document.createElement('a');
-                a.download = 'parliament_diagram_3200x2100.png';
-                a.href = canvas.toDataURL('image/png');
-                document.body.appendChild(a); a.click(); document.body.removeChild(a);
-                showToast('PNG высокой чёткости скачан');
+                const a = document.createElement('a'); a.download = 'parliament_diagram_3200x2100.png'; a.href = canvas.toDataURL('image/png');
+                a.click();
             };
             img.src = url;
         }
