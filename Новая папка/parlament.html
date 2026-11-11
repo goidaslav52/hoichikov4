@@ -343,6 +343,31 @@
             renderPartyList(); updateDiagram();
         }
 
+        function handleDragStart(e, idx) {
+            draggedIndex = idx;
+            e.target.classList.add('dragging');
+            e.dataTransfer.effectAllowed = 'move';
+        }
+
+        function handleDragOver(e) {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+        }
+
+        function handleDrop(e, targetIdx) {
+            e.preventDefault();
+            if (draggedIndex === null || draggedIndex === targetIdx) return;
+            const movedItem = parties.splice(draggedIndex, 1)[0];
+            parties.splice(targetIdx, 0, movedItem);
+            draggedIndex = null;
+            renderPartyList(); updateDiagram();
+        }
+
+        function handleDragEnd(e) {
+            e.target.classList.remove('dragging');
+            draggedIndex = null;
+        }
+
         function updateSeats(index, value) {
             const seats = parseInt(value, 10);
             if (!isNaN(seats) && seats >= 1) { parties[index].seats = seats; updateDiagram(); }
@@ -370,7 +395,9 @@
                 return `
                     <div class="party-row bg-slate-950 border border-slate-800 hover:border-slate-700 rounded-xl p-2.5 flex items-center gap-2 transition group"
                          draggable="true" ondragstart="handleDragStart(event, ${idx})" ondragover="handleDragOver(event)" ondrop="handleDrop(event, ${idx})" ondragend="handleDragEnd(event)">
-                        <div class="drag-handle text-slate-600 hover:text-slate-300 px-1"><i class="ph ph-dots-six-vertical text-base"></i></div>
+                        <div class="drag-handle text-slate-600 hover:text-slate-300 px-1" title="Перетащите для сортировки">
+                            <i class="ph ph-dots-six-vertical text-base"></i>
+                        </div>
                         <input type="color" value="${p.color}" onchange="updatePartyColor(${idx}, this.value)" class="w-6 h-6 rounded-md border border-slate-700 bg-transparent cursor-pointer p-0 shrink-0">
                         <div class="flex-1 min-w-0">
                             <input type="text" value="${escapeHtml(p.name)}" onchange="updatePartyName(${idx}, this.value)" class="w-full bg-transparent text-slate-100 text-xs font-semibold focus:bg-slate-900 focus:px-1 rounded outline-none truncate">
@@ -380,26 +407,14 @@
                             <input type="number" min="1" value="${p.seats}" onchange="updateSeats(${idx}, this.value)" class="w-full bg-slate-900 border border-slate-700 text-slate-200 rounded px-2 py-1 text-xs font-mono font-bold text-right outline-none">
                         </div>
                         <div class="flex items-center gap-1 shrink-0">
-                            <button type="button" onclick="moveParty(${idx}, -1)" ${idx === 0 ? 'disabled class="opacity-30 cursor-not-allowed text-slate-600 p-1"' : 'class="p-1 text-slate-400 hover:text-white"'}><i class="ph ph-caret-up"></i></button>
-                            <button type="button" onclick="moveParty(${idx}, 1)" ${idx === parties.length - 1 ? 'disabled class="opacity-30 cursor-not-allowed text-slate-600 p-1"' : 'class="p-1 text-slate-400 hover:text-white"'}><i class="ph ph-caret-down"></i></button>
-                            <button type="button" onclick="deleteParty(${idx})" class="p-1 text-slate-500 hover:text-red-400 transition"><i class="ph ph-trash"></i></button>
+                            <button type="button" onclick="moveParty(${idx}, -1)" ${idx === 0 ? 'disabled class="opacity-30 cursor-not-allowed text-slate-600 p-1"' : 'class="p-1 text-slate-400 hover:text-white"'} title="Вверх"><i class="ph ph-caret-up"></i></button>
+                            <button type="button" onclick="moveParty(${idx}, 1)" ${idx === parties.length - 1 ? 'disabled class="opacity-30 cursor-not-allowed text-slate-600 p-1"' : 'class="p-1 text-slate-400 hover:text-white"'} title="Вниз"><i class="ph ph-caret-down"></i></button>
+                            <button type="button" onclick="deleteParty(${idx})" class="p-1 text-slate-500 hover:text-red-400 transition" title="Удалить"><i class="ph ph-trash"></i></button>
                         </div>
                     </div>
                 `;
             }).join('');
         }
-
-        function handleDragStart(e, idx) { draggedIndex = idx; e.target.classList.add('dragging'); e.dataTransfer.effectAllowed = 'move'; }
-        function handleDragOver(e) { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; }
-        function handleDrop(e, targetIdx) {
-            e.preventDefault();
-            if (draggedIndex === null || draggedIndex === targetIdx) return;
-            const movedItem = parties.splice(draggedIndex, 1)[0];
-            parties.splice(targetIdx, 0, movedItem);
-            draggedIndex = null;
-            renderPartyList(); updateDiagram();
-        }
-        function handleDragEnd(e) { e.target.classList.remove('dragging'); draggedIndex = null; }
 
         function toggleAutoRows() {
             const isAuto = document.getElementById('cfgAutoRows').checked;
