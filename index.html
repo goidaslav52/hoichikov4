@@ -1,39 +1,406 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="ru" class="dark">
 <head>
     <meta charset="UTF-8">
-    <title>Мое Хранилище</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>База знаний и Парламент</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Phosphor Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        slate: {
+                            850: '#131e32',
+                            950: '#070d19'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
     <style>
-        body { font-family: sans-serif; background: #121212; color: #e0e0e0; padding: 40px; }
-        input { padding: 10px; width: 300px; font-size: 16px; background: #222; color: #fff; border: 1px solid #444; }
-        .secret-menu { display: none; margin-top: 20px; padding: 20px; background: #1e3a1e; border: 1px solid #2e7d32; }
+        .section { display: none; }
+        .section.active { display: block; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #0f172a; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #475569; }
+        .bg-checkered {
+            background-color: #0f172a;
+            background-image: linear-gradient(45deg, #1e293b 25%, transparent 25%), linear-gradient(-45deg, #1e293b 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #1e293b 75%), linear-gradient(-45deg, transparent 75%, #1e293b 75%);
+            background-size: 20px 20px;
+            background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+        }
+        .party-row.dragging { opacity: 0.4; border-style: dashed; border-color: #6366f1; }
+        .drag-handle { cursor: grab; user-select: none; }
+        .drag-handle:active { cursor: grabbing; }
     </style>
 </head>
-<body>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col font-sans antialiased selection:bg-indigo-500 selection:text-white">
 
-    <h1>База знаний и Хранилище</h1>
-    <p>Введите поисковый запрос (или секретный код):</p>
-    
-    <!-- Строка поиска -->
-    <input type="text" id="searchBox" placeholder="Поиск или код...">
-
-    <!-- Скрытое меню, которое открывается по коду 12221 -->
-    <div id="secretMenu" class="secret-menu">
-        <h2>🔒 Секретное меню администратора</h2>
-        <p>Добро пожаловать в скрытый раздел! Сюда можно добавить загрузку файлов и схемы парламентов.</p>
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed top-5 right-5 z-50 transform translate-y-[-100px] opacity-0 transition-all duration-300 pointer-events-none bg-indigo-600 text-white px-4 py-3 rounded-xl shadow-2xl flex items-center gap-3 border border-indigo-400/30">
+        <i class="ph ph-check-circle text-xl"></i>
+        <span id="toastMsg" class="text-sm font-medium">Действие выполнено</span>
     </div>
 
+    <!-- Header Navigation & Search -->
+    <header class="bg-slate-900/90 border-b border-slate-800 sticky top-0 z-40 backdrop-blur-md">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex flex-col sm:flex-row items-center justify-between gap-3 py-3">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-500 flex items-center justify-center shadow-lg shadow-indigo-500/20">
+                    <i class="ph ph-buildings text-white text-xl"></i>
+                </div>
+                <div>
+                    <h1 class="text-base font-bold text-white leading-tight">База знаний & Парламент</h1>
+                    <p class="text-xs text-slate-400">hoichikov4.org</p>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-4 w-full sm:w-auto justify-end">
+                <input type="text" id="searchBox" placeholder="Поиск или секретный код..." 
+                    class="bg-slate-950 border border-slate-700 text-slate-200 placeholder-slate-500 rounded-lg px-3.5 py-1.5 text-xs w-full sm:w-64 focus:ring-2 focus:ring-indigo-500 outline-none">
+
+                <nav class="flex items-center gap-2">
+                    <button onclick="switchTab('main')" id="btn-main" class="px-3.5 py-2 text-xs font-semibold rounded-lg bg-slate-800 text-slate-200 hover:bg-slate-700 transition">Главная</button>
+                    <button onclick="switchTab('parliament')" id="btn-parliament" class="px-3.5 py-2 text-xs font-semibold rounded-lg bg-slate-800 text-slate-200 hover:bg-slate-700 transition">Парламент</button>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Body -->
+    <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8">
+
+        <!-- TAB 1: MAIN HOME -->
+        <div id="tab-main" class="section active space-y-6">
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl">
+                <h2 class="text-xl font-bold text-white mb-2">Добро пожаловать в Хранилище</h2>
+                <p class="text-sm text-slate-400">Используйте навигацию в шапке сайта или перейдите в раздел парламента.</p>
+                
+                <div id="secretMenu" class="mt-6 p-5 bg-indigo-950/40 border border-indigo-800/60 rounded-xl hidden">
+                    <h3 class="text-sm font-bold text-indigo-300 flex items-center gap-2 mb-1">
+                        <i class="ph ph-lock-key-open text-base"></i> Секретное меню администратора
+                    </h3>
+                    <p class="text-xs text-slate-300">Секретный код <code>12221</code> успешно принят.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 2: PARLIAMENT GENERATOR -->
+        <div id="tab-parliament" class="section">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+                <!-- Left Column: Controls & Party Editor -->
+                <div class="lg:col-span-5 flex flex-col gap-6">
+                    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl">
+                        <div class="flex items-center justify-between mb-4">
+                            <div>
+                                <h2 class="text-base font-bold text-white flex items-center gap-2">
+                                    <i class="ph ph-users-three text-indigo-400 text-lg"></i> Фракции и Партии
+                                </h2>
+                                <p class="text-[11px] text-slate-400">Перетаскивайте фракции для сортировки</p>
+                            </div>
+                            <span id="totalSeatsBadge" class="px-3 py-1 bg-indigo-950 text-indigo-300 border border-indigo-800 rounded-full text-xs font-bold font-mono">0 мест</span>
+                        </div>
+
+                        <div class="bg-slate-950 border border-slate-800 rounded-xl p-3 mb-4 flex items-center justify-between">
+                            <div class="flex items-center gap-2.5">
+                                <i class="ph ph-scales text-amber-400 text-xl"></i>
+                                <div>
+                                    <div class="text-[11px] text-slate-400 font-medium">Порог большинства (50% + 1)</div>
+                                    <div id="majorityValue" class="text-xs font-bold text-slate-200 font-mono">0 мест</div>
+                                </div>
+                            </div>
+                            <div id="majorityPercentage" class="text-xs font-semibold text-indigo-400 bg-indigo-950/80 px-2.5 py-1 rounded-lg border border-indigo-900/60 font-mono">--</div>
+                        </div>
+
+                        <!-- Add Party Form -->
+                        <form id="addPartyForm" onsubmit="event.preventDefault(); submitAddParty(); return false;" class="bg-slate-950 border border-slate-800 p-3.5 rounded-xl mb-4 space-y-3">
+                            <div class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider flex justify-between items-center">
+                                <span>Добавить партию</span>
+                                <span class="text-indigo-400">Палитра</span>
+                            </div>
+                            <div class="grid grid-cols-12 gap-2">
+                                <div class="col-span-6">
+                                    <input type="text" id="newPartyName" placeholder="Название партии" required
+                                        class="w-full bg-slate-900 border border-slate-700 text-slate-100 placeholder-slate-500 rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-indigo-500 outline-none">
+                                </div>
+                                <div class="col-span-3">
+                                    <input type="number" id="newPartySeats" min="1" max="10000" placeholder="Мест" required
+                                        class="w-full bg-slate-900 border border-slate-700 text-slate-100 placeholder-slate-500 rounded-lg px-2.5 py-2 text-xs font-mono focus:ring-2 focus:ring-indigo-500 outline-none">
+                                </div>
+                                <div class="col-span-3 flex items-center gap-1.5">
+                                    <input type="color" id="newPartyColor" value="#ef4444" class="w-9 h-9 rounded-lg border border-slate-700 bg-slate-900 cursor-pointer p-0.5">
+                                    <button type="button" onclick="submitAddParty()" class="flex-1 h-9 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold rounded-lg text-xs transition flex items-center justify-center shadow-lg shadow-indigo-600/30">
+                                        <i class="ph ph-plus text-base"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+
+                        <div id="partiesContainer" class="space-y-2 max-h-[360px] overflow-y-auto pr-1"></div>
+                    </div>
+
+                    <!-- Geometry Settings -->
+                    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl space-y-4">
+                        <h2 class="text-base font-bold text-white flex items-center gap-2">
+                            <i class="ph ph-sliders text-indigo-400 text-lg"></i> Настройки схемы
+                        </h2>
+                        <div class="space-y-2">
+                            <label class="block text-xs font-semibold text-slate-300">Заголовок</label>
+                            <input type="text" id="cfgTitle" value="Парламентская Ассамблея" oninput="updateDiagram()"
+                                class="w-full bg-slate-950 border border-slate-700 text-slate-100 rounded-lg px-3 py-2 text-xs outline-none">
+                        </div>
+                        <div class="space-y-2">
+                            <label class="block text-xs font-semibold text-slate-300">Подзаголовок</label>
+                            <input type="text" id="cfgSubtitle" value="Распределение 5000 мест по фракциям" oninput="updateDiagram()"
+                                class="w-full bg-slate-950 border border-slate-700 text-slate-100 rounded-lg px-3 py-2 text-xs outline-none">
+                        </div>
+                        <div class="grid grid-cols-2 gap-3 pt-2">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-300 mb-1">Форма мест</label>
+                                <select id="cfgShape" onchange="updateDiagram()" class="w-full bg-slate-950 border border-slate-700 text-slate-200 rounded-lg px-2.5 py-2 text-xs outline-none">
+                                    <option value="circle">Точки</option>
+                                    <option value="square">Квадраты</option>
+                                    <option value="rounded">Скруглённые</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-300 mb-1">Фон схемы</label>
+                                <select id="cfgBg" onchange="updateDiagram()" class="w-full bg-slate-950 border border-slate-700 text-slate-200 rounded-lg px-2.5 py-2 text-xs outline-none">
+                                    <option value="#000000">Чёрный</option>
+                                    <option value="#0f172a" selected>Тёмно-синий</option>
+                                    <option value="#ffffff">Белый</option>
+                                    <option value="transparent">Прозрачный</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Column: Live Viewer & Export -->
+                <div class="lg:col-span-7 flex flex-col gap-4">
+                    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl flex flex-col flex-1">
+                        <div class="flex items-center justify-between mb-4">
+                            <h2 class="text-base font-bold text-white flex items-center gap-2">
+                                <i class="ph ph-eye text-indigo-400 text-lg"></i> Просмотр Диаграммы
+                            </h2>
+                            <div class="flex items-center gap-2">
+                                <button type="button" onclick="downloadSVG()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-lg border border-slate-700 transition">SVG</button>
+                                <button type="button" onclick="downloadPNG()" class="px-3.5 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-lg transition shadow-lg">Скачать PNG</button>
+                            </div>
+                        </div>
+
+                        <div id="svgFrame" class="w-full flex-1 min-h-[480px] bg-slate-950 border border-slate-800 rounded-xl flex items-center justify-center p-3 relative overflow-hidden">
+                            <svg id="parliamentSvg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1050" class="w-full h-auto max-h-[700px] drop-shadow-2xl"></svg>
+                        </div>
+                    </div>
+                    <textarea id="svgRawOutput" readonly class="hidden"></textarea>
+                </div>
+            </div>
+        </div>
+    </main>
+
     <script>
+        let parties = [
+            { id: 1, name: 'Левый Фронт', seats: 1200, color: '#ef4444' },
+            { id: 2, name: 'Социал-Демократы', seats: 1450, color: '#f97316' },
+            { id: 3, name: 'Зелёные', seats: 350, color: '#22c55e' },
+            { id: 4, name: 'Центристы', seats: 800, color: '#eab308' },
+            { id: 5, name: 'Консерваторы', seats: 900, color: '#3b82f6' },
+            { id: 6, name: 'Националисты', seats: 300, color: '#a855f7' }
+        ];
+
+        function switchTab(tabName) {
+            document.querySelectorAll('.section').forEach(el => el.classList.remove('active'));
+            document.getElementById('tab-' + tabName).classList.add('active');
+            if (tabName === 'parliament') {
+                history.pushState(null, '', '/parlament');
+                updateDiagram();
+            } else {
+                history.pushState(null, '', '/');
+            }
+        }
+
+        // Авто-открытие вкладки парламента при переходе по ссылке /parlament
+        if (window.location.pathname.includes('parlament')) {
+            switchTab('parliament');
+        }
+
         const searchBox = document.getElementById('searchBox');
         const secretMenu = document.getElementById('secretMenu');
-
         searchBox.addEventListener('input', (e) => {
             if (e.target.value.trim() === '12221') {
-                secretMenu.style.display = 'block'; // Показываем секретный блок
-                searchBox.value = ''; // Очищаем строку поиска
+                secretMenu.classList.remove('hidden');
+                searchBox.value = '';
             }
         });
-    </script>
 
+        window.onload = function() {
+            renderPartyList();
+            updateDiagram();
+        };
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toastMsg').textContent = msg;
+            toast.classList.remove('translate-y-[-100px]', 'opacity-0');
+            setTimeout(() => toast.classList.add('translate-y-[-100px]', 'opacity-0'), 2500);
+        }
+
+        function submitAddParty() {
+            const name = document.getElementById('newPartyName').value.trim();
+            const seats = parseInt(document.getElementById('newPartySeats').value, 10);
+            const color = document.getElementById('newPartyColor').value;
+            if (!name || isNaN(seats) || seats < 1) return;
+            parties.push({ id: Date.now(), name, seats, color });
+            document.getElementById('newPartyName').value = '';
+            document.getElementById('newPartySeats').value = '';
+            renderPartyList();
+            updateDiagram();
+            showToast(`Фракция добавлена`);
+        }
+
+        function deleteParty(idx) {
+            parties.splice(idx, 1);
+            renderPartyList();
+            updateDiagram();
+        }
+
+        function updateSeats(idx, val) {
+            const s = parseInt(val, 10);
+            if (!isNaN(s) && s >= 1) { parties[idx].seats = s; updateDiagram(); }
+        }
+
+        function updatePartyName(idx, val) { parties[idx].name = val.trim() || 'Партия'; updateDiagram(); }
+        function updatePartyColor(idx, color) { parties[idx].color = color; updateDiagram(); }
+
+        function renderPartyList() {
+            const container = document.getElementById('partiesContainer');
+            const totalSeats = parties.reduce((sum, p) => sum + p.seats, 0);
+            document.getElementById('totalSeatsBadge').textContent = `${totalSeats.toLocaleString('ru-RU')} мест`;
+            const maj = Math.floor(totalSeats / 2) + 1;
+            document.getElementById('majorityValue').textContent = `${maj.toLocaleString('ru-RU')} мест`;
+            document.getElementById('majorityPercentage').textContent = totalSeats ? `${((maj / totalSeats) * 100).toFixed(1)}%` : '--';
+
+            container.innerHTML = parties.map((p, idx) => `
+                <div class="bg-slate-950 border border-slate-800 rounded-xl p-2.5 flex items-center gap-2">
+                    <input type="color" value="${p.color}" onchange="updatePartyColor(${idx}, this.value)" class="w-6 h-6 rounded border border-slate-700 bg-transparent cursor-pointer p-0 shrink-0">
+                    <input type="text" value="${p.name}" onchange="updatePartyName(${idx}, this.value)" class="w-full bg-transparent text-slate-100 text-xs font-semibold outline-none">
+                    <input type="number" min="1" value="${p.seats}" onchange="updateSeats(${idx}, this.value)" class="w-20 bg-slate-900 border border-slate-700 text-slate-200 rounded px-2 py-1 text-xs font-mono text-right outline-none">
+                    <button type="button" onclick="deleteParty(${idx})" class="text-slate-500 hover:text-red-400 p-1"><i class="ph ph-trash"></i></button>
+                </div>
+            `).join('');
+        }
+
+        function calculateParliamentSpots(totalSeats) {
+            if (totalSeats <= 0) return { spots: [], numRows: 0 };
+            let rows = Math.max(2, Math.min(80, Math.round(0.55 * Math.sqrt(totalSeats))));
+            const rMin = 260, rMax = 680, cx = 800, cy = 820;
+            const radii = []; let sumRadii = 0;
+            for (let i = 0; i < rows; i++) {
+                const r = rows === 1 ? rMax : rMin + (i * (rMax - rMin) / (rows - 1));
+                radii.push(r); sumRadii += r;
+            }
+            const spotsPerRow = []; let allocated = 0;
+            for (let i = 0; i < rows; i++) {
+                let count = Math.round(totalSeats * (radii[i] / sumRadii));
+                spotsPerRow.push(count); allocated += count;
+            }
+            let diff = totalSeats - allocated; let rIdx = rows - 1;
+            while (diff !== 0) {
+                if (diff > 0) { spotsPerRow[rIdx]++; diff--; }
+                else if (spotsPerRow[rIdx] > 1) { spotsPerRow[rIdx]--; diff++; }
+                rIdx = (rIdx - 1 + rows) % rows;
+            }
+            const spots = [];
+            for (let i = 0; i < rows; i++) {
+                const r = radii[i]; const count = spotsPerRow[i];
+                for (let j = 0; j < count; j++) {
+                    const angle = Math.PI - ((j + 0.5) / count) * Math.PI;
+                    spots.push({ x: cx + r * Math.cos(angle), y: cy - r * Math.sin(angle), angle });
+                }
+            }
+            spots.sort((a, b) => b.angle - a.angle);
+            return { spots, numRows: rows };
+        }
+
+        function updateDiagram() {
+            const totalSeats = parties.reduce((sum, p) => sum + p.seats, 0);
+            const { spots, numRows } = calculateParliamentSpots(totalSeats);
+            const shape = document.getElementById('cfgShape').value;
+            const bgColor = document.getElementById('cfgBg').value;
+            const titleText = document.getElementById('cfgTitle').value.trim();
+            const subtitleText = document.getElementById('cfgSubtitle').value.trim();
+
+            const frame = document.getElementById('svgFrame');
+            frame.style.backgroundColor = bgColor === 'transparent' ? 'transparent' : bgColor;
+            if(bgColor === 'transparent') frame.className = 'w-full flex-1 min-h-[480px] border border-slate-800 rounded-xl flex items-center justify-center p-3 relative overflow-hidden bg-checkered';
+
+            const stepR = numRows > 1 ? (680 - 260) / (numRows - 1) : 40;
+            const spotRadius = Math.max(0.6, stepR * 0.38);
+
+            let spotIdx = 0; let seatsSvgMarkup = '';
+            parties.forEach(party => {
+                for (let i = 0; i < party.seats; i++) {
+                    if (spotIdx >= spots.length) break;
+                    const spot = spots[spotIdx];
+                    if (shape === 'circle') {
+                        seatsSvgMarkup += `<circle cx="${spot.x.toFixed(2)}" cy="${spot.y.toFixed(2)}" r="${spotRadius.toFixed(2)}" fill="${party.color}" />`;
+                    } else {
+                        const s = (spotRadius * 1.75).toFixed(2);
+                        seatsSvgMarkup += `<rect x="${(spot.x - spotRadius*0.875).toFixed(2)}" y="${(spot.y - spotRadius*0.875).toFixed(2)}" width="${s}" height="${s}" fill="${party.color}" />`;
+                    }
+                    spotIdx++;
+                }
+            });
+
+            let legendMarkup = '';
+            parties.forEach((p, i) => {
+                const col = Math.floor(i / Math.ceil(parties.length / 3));
+                const row = i % Math.ceil(parties.length / 3);
+                legendMarkup += `<g transform="translate(${120 + col * 480}, ${910 + row * 34})"><circle cx="12" cy="0" r="9" fill="${p.color}" /><text x="30" y="5" fill="#fff" font-size="18" font-weight="600">${p.name}</text><text x="360" y="5" fill="#94a3b8" font-size="16" text-anchor="end">${p.seats}</text></g>`;
+            });
+
+            const svgContent = `
+                <rect width="1600" height="1050" fill="${bgColor === 'transparent' ? 'none' : bgColor}" />
+                ${titleText ? `<text x="800" y="75" text-anchor="middle" fill="#fff" font-size="40" font-weight="800">${titleText}</text>` : ''}
+                ${subtitleText ? `<text x="800" y="118" text-anchor="middle" fill="#94a3b8" font-size="20">${subtitleText}</text>` : ''}
+                <g>${seatsSvgMarkup}</g>
+                <text x="800" y="795" text-anchor="middle" fill="#fff" font-size="52" font-weight="900">${totalSeats.toLocaleString()}</text>
+                <g>${legendMarkup}</g>
+            `;
+            document.getElementById('parliamentSvg').innerHTML = svgContent;
+            document.getElementById('svgRawOutput').value = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1050" width="1600" height="1050">${svgContent}</svg>`;
+        }
+
+        function downloadSVG() {
+            const blob = new Blob([document.getElementById('svgRawOutput').value], { type: 'image/svg+xml;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a'); a.href = url; a.download = 'parliament.svg';
+            a.click(); URL.revokeObjectURL(url);
+        }
+
+        function downloadPNG() {
+            const svgString = new XMLSerializer().serializeToString(document.getElementById('parliamentSvg'));
+            const canvas = document.createElement('canvas'); canvas.width = 3200; canvas.height = 2100;
+            const ctx = canvas.getContext('2d'); const img = new Image();
+            const blob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            img.onload = function() {
+                ctx.drawImage(img, 0, 0, 3200, 2100);
+                URL.revokeObjectURL(url);
+                const a = document.createElement('a'); a.download = 'parliament.png'; a.href = canvas.toDataURL('image/png');
+                a.click();
+            };
+            img.src = url;
+        }
+    </script>
 </body>
 </html>
