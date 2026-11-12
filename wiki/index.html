@@ -81,9 +81,9 @@
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col font-sans antialiased selection:bg-indigo-500 selection:text-white">
 
-    <!-- Toast Notification -->
-    <div id="toast" class="fixed top-5 right-5 z-50 transform translate-y-[-100px] opacity-0 transition-all duration-300 pointer-events-none bg-indigo-600 text-white px-4 py-3 rounded-xl shadow-2xl flex items-center gap-3 border border-indigo-400/30">
-        <i class="ph ph-check-circle text-xl"></i>
+    <!-- Toast Notification (z-[100] всегда поверх модального окна) -->
+    <div id="toast" class="fixed top-5 right-5 z-[100] transform translate-y-[-100px] opacity-0 transition-all duration-300 pointer-events-none bg-indigo-600 text-white px-4 py-3 rounded-xl shadow-2xl flex items-center gap-3 border border-indigo-400/30">
+        <i id="toastIcon" class="ph ph-check-circle text-xl shrink-0"></i>
         <span id="toastMsg" class="text-sm font-medium">Готово</span>
     </div>
 
@@ -287,6 +287,12 @@
                         <div id="edInfoboxRows" class="space-y-2"></div>
                     </div>
                 </div>
+
+                <!-- Блок отображения ошибок прямо внутри окна редактора -->
+                <div id="editorErrorBox" class="hidden p-3.5 bg-red-950/90 border border-red-500/60 rounded-xl text-xs text-red-200 flex items-center gap-2.5">
+                    <i class="ph ph-warning-circle text-lg text-red-400 shrink-0"></i>
+                    <span id="editorErrorText"></span>
+                </div>
             </div>
 
             <div class="bg-slate-950 border-t border-slate-800 px-6 py-4 flex items-center justify-between">
@@ -306,10 +312,10 @@
     <script>
         // =========================================================================
         // НАСТРОЙКА SUPABASE
-        // Вставьте ниже ваш Publishable key (sb_publishable_...) или anon key (eyJ...)
+        // Замените текст внутри кавычек на ваш Publishable key (sb_publishable_...)
         // =========================================================================
         const SUPABASE_URL = 'https://fqormwsoyczshuoeafxo.supabase.co';
-        const SUPABASE_KEY = 'ВСТАВЬТЕ_СЮДА_СКОПИРОВАННЫЙ_PUBLISHABLE_ИЛИ_ANON_КЛЮЧ';
+        const SUPABASE_KEY = 'ВСТАВЬТЕ_СЮДА_СКОПИРОВАННЫЙ_PUBLISHABLE_КЛЮЧ';
 
         // Резервные статьи (показываются только если ключ ещё не вставлен)
         const fallbackArticles = {
@@ -333,6 +339,7 @@
         let currentArticleId = null;
         let editingArticleId = null;
         let adminSecretCode = sessionStorage.getItem('hoichikov4_admin_code') || '';
+        let toastTimer = null;
 
         document.execCommand('defaultParagraphSeparator', false, 'p');
 
@@ -354,11 +361,28 @@
             return headers;
         }
 
+        function showEditorError(msg) {
+            const box = document.getElementById('editorErrorBox');
+            const text = document.getElementById('editorErrorText');
+            if (!msg) {
+                box.classList.add('hidden');
+                return;
+            }
+            text.textContent = msg;
+            box.classList.remove('hidden');
+        }
+
         function showToast(msg, isError = false) {
             const toast = document.getElementById('toast');
-            toast.className = `fixed top-5 right-5 z-50 transition-all duration-300 pointer-events-none px-4 py-3 rounded-xl shadow-2xl flex items-center gap-3 border text-white ${isError ? 'bg-red-600 border-red-400/30' : 'bg-indigo-600 border-indigo-400/30'}`;
+            const icon = document.getElementById('toastIcon');
+            toast.className = `fixed top-5 right-5 z-[100] transition-all duration-300 pointer-events-none px-4 py-3 rounded-xl shadow-2xl flex items-center gap-3 border text-white ${isError ? 'bg-red-600 border-red-400/40' : 'bg-indigo-600 border-indigo-400/40'}`;
+            icon.className = isError ? 'ph ph-warning-circle text-xl shrink-0' : 'ph ph-check-circle text-xl shrink-0';
             document.getElementById('toastMsg').textContent = msg;
-            setTimeout(() => toast.classList.add('translate-y-[-100px]', 'opacity-0'), 3400);
+            
+            if (toastTimer) clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => {
+                toast.classList.add('translate-y-[-100px]', 'opacity-0');
+            }, 3800);
         }
 
         function enableAdminMode(code, silent = false) {
@@ -421,8 +445,7 @@
 
         async function saveArticleToCloud(id, articleObj) {
             if (!isSupabaseConfigured()) {
-                showToast('Вставьте свой ключ Supabase в строку SUPABASE_KEY', true);
-                return false;
+                throw new Error('Ключ Supabase не прописан в коде файла (строка SUPABASE_KEY)');
             }
 
             const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/save_wiki_article`, {
@@ -447,8 +470,7 @@
 
         async function deleteArticleFromCloud(id) {
             if (!isSupabaseConfigured()) {
-                showToast('Вставьте свой ключ Supabase в строку SUPABASE_KEY', true);
-                return false;
+                throw new Error('Ключ Supabase не прописан в коде файла (строка SUPABASE_KEY)');
             }
 
             const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/delete_wiki_article`, {
@@ -645,6 +667,7 @@
         function openEditor(id) {
             if (!adminSecretCode) return;
             editingArticleId = id;
+            showEditorError('');
             const modal = document.getElementById('editorModal');
             const rowsContainer = document.getElementById('edInfoboxRows');
             rowsContainer.innerHTML = '';
@@ -686,17 +709,19 @@
         }
 
         function closeEditor() {
+            showEditorError('');
             document.getElementById('editorModal').classList.add('hidden');
         }
 
         async function saveVisualArticle() {
+            showEditorError('');
             const title = document.getElementById('edTitle').value.trim();
             const category = document.getElementById('edCategory').value.trim() || 'Общее';
             const id = document.getElementById('edId').value.trim() || transliterateSlug(title);
             const content = document.getElementById('visualEditor').innerHTML.trim();
 
             if (!title || !id) {
-                showToast('Укажите название статьи', true);
+                showEditorError('Укажите название статьи');
                 return;
             }
 
@@ -732,6 +757,7 @@
                     showToast('Статья опубликована и видна всем посетителям!');
                 }
             } catch (err) {
+                showEditorError(err.message);
                 showToast(err.message, true);
             } finally {
                 btn.disabled = false;
@@ -742,6 +768,7 @@
         async function deleteArticleDirect(id) {
             if (!adminSecretCode || !id) return;
             if (Object.keys(wikiArticles).length <= 1) {
+                showEditorError('Нельзя удалить последнюю статью');
                 showToast('Нельзя удалить последнюю статью', true);
                 return;
             }
@@ -756,6 +783,7 @@
                     showToast('Статья удалена для всех!');
                 }
             } catch (err) {
+                showEditorError(err.message);
                 showToast(err.message, true);
             }
         }
