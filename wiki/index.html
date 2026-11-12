@@ -81,7 +81,7 @@
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col font-sans antialiased selection:bg-indigo-500 selection:text-white">
 
-    <!-- Toast Notification (z-[100] всегда поверх модального окна) -->
+    <!-- Toast Notification -->
     <div id="toast" class="fixed top-5 right-5 z-[100] transform translate-y-[-100px] opacity-0 transition-all duration-300 pointer-events-none bg-indigo-600 text-white px-4 py-3 rounded-xl shadow-2xl flex items-center gap-3 border border-indigo-400/30">
         <i id="toastIcon" class="ph ph-check-circle text-xl shrink-0"></i>
         <span id="toastMsg" class="text-sm font-medium">Готово</span>
@@ -310,14 +310,9 @@
     </div>
 
     <script>
-        // =========================================================================
-        // НАСТРОЙКА SUPABASE
-        // Замените текст внутри кавычек на ваш Publishable key (sb_publishable_...)
-        // =========================================================================
         const SUPABASE_URL = 'https://fqormwsoyczshuoeafxo.supabase.co';
-        const SUPABASE_KEY = 'ВСТАВЬТЕ_СЮДА_СКОПИРОВАННЫЙ_PUBLISHABLE_КЛЮЧ';
+        const SUPABASE_KEY = 'sb_publishable_144xqWA1DDlACjTIPJYB_A_AMMz7ZQ4';
 
-        // Резервные статьи (показываются только если ключ ещё не вставлен)
         const fallbackArticles = {
             "danorisiya": {
                 title: "Данорисия",
