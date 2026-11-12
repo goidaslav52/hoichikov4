@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="ru" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Вики-энциклопедия — hoichikov4.org</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        slate: { 850: '#131e32', 950: '#070d19' }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #0f172a; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #475569; }
+        
+        .wiki-content h2, #visualEditor h2 {
+            font-size: 1.35rem;
+            font-weight: 700;
+            color: #ffffff;
+            border-bottom: 1px solid #1e293b;
+            padding-bottom: 0.4rem;
+            margin-top: 1.5rem;
+            margin-bottom: 0.85rem;
+        }
+        .wiki-content h3, #visualEditor h3 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #e2e8f0;
+            margin-top: 1.25rem;
+            margin-bottom: 0.5rem;
+        }
+        .wiki-content p, #visualEditor p {
+            color: #cbd5e1;
+            line-height: 1.7;
+            margin-bottom: 0.9rem;
+            font-size: 0.925rem;
+        }
+        .wiki-content ul, #visualEditor ul {
+            list-style-type: disc;
+            padding-left: 1.5rem;
+            color: #cbd5e1;
+            margin-bottom: 1rem;
+            font-size: 0.925rem;
+        }
+        .wiki-content li, #visualEditor li {
+            margin-bottom: 0.35rem;
+        }
+        .wiki-link {
+            color: #818cf8;
+            text-decoration: none;
+            border-bottom: 1px dashed rgba(129, 140, 248, 0.5);
+            transition: all 0.15s;
+        }
+        .wiki-link:hover {
+            color: #a5b4fc;
+            border-bottom-style: solid;
+        }
+        .wiki-link-red {
+            color: #f87171;
+            text-decoration: none;
+            border-bottom: 1px dashed rgba(248, 113, 113, 0.5);
+            cursor: not-allowed;
+        }
+        #visualEditor:empty:before {
+            content: attr(data-placeholder);
+            color: #64748b;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col font-sans antialiased selection:bg-indigo-500 selection:text-white">
+
+    <!-- Toast -->
+    <div id="toast" class="fixed top-5 right-5 z-50 transform translate-y-[-100px] opacity-0 transition-all duration-300 pointer-events-none bg-indigo-600 text-white px-4 py-3 rounded-xl shadow-2xl flex items-center gap-3 border border-indigo-400/30">
+        <i class="ph ph-check-circle text-xl"></i>
+        <span id="toastMsg" class="text-sm font-medium">Готово</span>
+    </div>
+
+    <!-- Header Navigation -->
+    <header class="bg-slate-900/90 border-b border-slate-800 sticky top-0 z-40 backdrop-blur-md">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex flex-col sm:flex-row items-center justify-between gap-3 py-3">
+            <div class="flex items-center gap-3">
+                <a href="/" class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-500 flex items-center justify-center shadow-lg shadow-indigo-500/20 hover:opacity-90 transition">
+                    <i class="ph ph-book-open-text text-white text-xl"></i>
+                </a>
+                <div>
+                    <h1 class="text-base font-bold text-white leading-tight">Вики-энциклопедия</h1>
+                    <p class="text-xs text-slate-400"><a href="/" class="text-indigo-400 hover:underline">hoichikov4.org</a> • Свободный справочник</p>
+                </div>
+            </div>
+
+            <nav class="flex items-center gap-2 flex-wrap">
+                <a href="/" class="px-3.5 py-2 text-xs font-semibold rounded-lg bg-slate-800 text-slate-200 hover:bg-slate-700 transition">Главная</a>
+                <a href="/parlament" class="px-3.5 py-2 text-xs font-semibold rounded-lg bg-slate-800 text-slate-200 hover:bg-slate-700 transition">Парламент</a>
+                <a href="/wiki" class="px-3.5 py-2 text-xs font-semibold rounded-lg bg-indigo-600 text-white shadow-lg shadow-indigo-600/30">Вики</a>
+                <a href="/contact" class="px-3.5 py-2 text-xs font-semibold rounded-lg bg-slate-800 text-slate-200 hover:bg-slate-700 transition">Связь</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Layout -->
+    <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+
+        <!-- Left Sidebar -->
+        <aside class="lg:col-span-3 bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-xl space-y-3 lg:sticky lg:top-24">
+            <button type="button" onclick="openEditor(null)" 
+                class="w-full py-2.5 px-3 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-xl shadow-lg shadow-indigo-600/25 transition flex items-center justify-center gap-2">
+                <i class="ph ph-plus-circle text-base"></i> Новая статья
+            </button>
+
+            <div class="relative">
+                <i class="ph ph-magnifying-glass absolute left-3 top-2.5 text-slate-500 text-sm"></i>
+                <input type="text" id="wikiSearch" placeholder="Поиск по статьям..." oninput="renderSidebar()"
+                    class="w-full bg-slate-950 border border-slate-700 text-slate-200 placeholder-slate-500 rounded-xl pl-9 pr-3 py-2 text-xs focus:ring-2 focus:ring-indigo-500 outline-none">
+            </div>
+
+            <button type="button" onclick="openRandomArticle()" 
+                class="w-full py-2 px-3 bg-slate-800/80 hover:bg-slate-800 text-slate-300 text-xs font-semibold rounded-xl border border-slate-700/70 transition flex items-center justify-center gap-2">
+                <i class="ph ph-shuffle text-indigo-400"></i> Случайная статья
+            </button>
+
+            <div class="border-t border-slate-800 pt-3">
+                <div class="text-[10px] font-bold uppercase tracking-wider text-slate-500 px-2 mb-2">Статьи по категориям</div>
+                <div id="articlesList" class="space-y-3 max-h-[45vh] overflow-y-auto pr-1"></div>
+            </div>
+
+            <!-- Export for GitHub -->
+            <div class="border-t border-slate-800 pt-3 space-y-2">
+                <button type="button" onclick="exportUpdatedHtmlFile()" 
+                    class="w-full py-2 px-3 bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 border border-emerald-500/40 text-xs font-bold rounded-xl transition flex items-center justify-center gap-2"
+                    title="Скачать обновлённый файл index.html для загрузки на GitHub">
+                    <i class="ph ph-download-simple text-base"></i> Скачать для GitHub
+                </button>
+                <p class="text-[10px] text-slate-500 leading-snug text-center">После правки скачайте файл и замените им <code>wiki/index.html</code> в репозитории</p>
+            </div>
+        </aside>
+
+        <!-- Right Main Content: Article Viewer -->
+        <article class="lg:col-span-9 bg-slate-900 border border-slate-800 rounded-2xl p-6 sm:p-8 shadow-xl min-h-[600px]">
+            <div class="border-b border-slate-800 pb-4 mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div>
+                    <div class="flex items-center gap-2 mb-1.5">
+                        <span id="artCategory" class="px-2.5 py-0.5 bg-indigo-950 text-indigo-300 border border-indigo-800/80 rounded-md text-[11px] font-semibold">Категория</span>
+                        <span class="text-xs text-slate-500">Материал из Вики hoichikov4.org</span>
+                    </div>
+                    <h1 id="artTitle" class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">Загрузка...</h1>
+                </div>
+                <div class="flex items-center gap-2 self-start sm:self-center">
+                    <button type="button" onclick="openEditor(currentArticleId)" class="px-3 py-1.5 bg-indigo-600/20 hover:bg-indigo-600/30 border border-indigo-500/40 text-indigo-300 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition">
+                        <i class="ph ph-pencil-simple"></i> Редактировать
+                    </button>
+                    <button type="button" onclick="copyArticleLink()" class="px-3 py-1.5 bg-slate-950 hover:bg-slate-800 border border-slate-800 text-slate-400 hover:text-slate-200 rounded-lg text-xs flex items-center gap-1.5 transition">
+                        <i class="ph ph-link"></i> <span id="copyLinkText">Ссылка</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Infobox -->
+            <div id="artInfobox" class="hidden lg:float-right lg:w-72 lg:ml-6 mb-6 bg-slate-950 border border-slate-800 rounded-xl overflow-hidden shadow-lg">
+                <div id="infoboxHeader" class="bg-indigo-950/90 border-b border-indigo-900/60 px-4 py-2.5 text-center font-bold text-sm text-white"></div>
+                <div id="infoboxBanner" class="p-4 flex items-center justify-center bg-slate-900/50 border-b border-slate-800"></div>
+                <table class="w-full text-xs">
+                    <tbody id="infoboxRows" class="divide-y divide-slate-800/80"></tbody>
+                </table>
+            </div>
+
+            <!-- Table of Contents -->
+            <div id="artToc" class="hidden bg-slate-950 border border-slate-800 rounded-xl p-4 mb-6 inline-block min-w-[240px] max-w-full">
+                <div class="text-xs font-bold text-slate-300 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                    <i class="ph ph-list-numbers text-indigo-400"></i> Содержание
+                </div>
+                <ol id="tocList" class="list-decimal list-inside space-y-1 text-xs text-indigo-400"></ol>
+            </div>
+
+            <!-- Article Body -->
+            <div id="artBody" class="wiki-content clearfix"></div>
+
+            <!-- Footer -->
+            <div class="mt-10 pt-4 border-t border-slate-800 flex items-center justify-between text-xs text-slate-500">
+                <div class="flex items-center gap-2">
+                    <i class="ph ph-tag text-slate-400"></i>
+                    <span>Категория: <strong id="footerCategory" class="text-slate-300"></strong></span>
+                </div>
+                <div>Визуальный движок hoichikov4</div>
+            </div>
+        </article>
+    </main>
+
+    <!-- VISUAL EDITOR MODAL -->
+    <div id="editorModal" class="hidden fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-sm overflow-y-auto p-4 sm:p-6">
+        <div class="max-w-4xl mx-auto bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl overflow-hidden my-4">
+            <!-- Modal Header -->
+            <div class="bg-slate-950 border-b border-slate-800 px-6 py-4 flex items-center justify-between">
+                <div class="flex items-center gap-2.5">
+                    <i class="ph ph-magic-wand text-indigo-400 text-xl"></i>
+                    <h2 id="editorModalTitle" class="text-base font-bold text-white">Визуальный редактор статьи</h2>
+                </div>
+                <button type="button" onclick="closeEditor()" class="text-slate-400 hover:text-white p-1">
+                    <i class="ph ph-x text-xl"></i>
+                </button>
+            </div>
+
+            <div class="p-6 space-y-5">
+                <!-- Basic Meta -->
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 mb-1">Название статьи *</label>
+                        <input type="text" id="edTitle" oninput="autoSlugify()" placeholder="Например: Кирландия"
+                            class="w-full bg-slate-950 border border-slate-700 text-white rounded-xl px-3.5 py-2 text-xs focus:ring-2 focus:ring-indigo-500 outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 mb-1">Категория *</label>
+                        <input type="text" id="edCategory" placeholder="Государства / Города / История"
+                            class="w-full bg-slate-950 border border-slate-700 text-white rounded-xl px-3.5 py-2 text-xs focus:ring-2 focus:ring-indigo-500 outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 mb-1">ID для ссылок (латиница)</label>
+                        <input type="text" id="edId" placeholder="kirlandiya"
+                            class="w-full bg-slate-950 border border-slate-700 text-indigo-300 font-mono rounded-xl px-3.5 py-2 text-xs focus:ring-2 focus:ring-indigo-500 outline-none">
+                    </div>
+                </div>
+
+                <!-- Visual Toolbar + Rich Text Editor -->
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1.5">Текст статьи (визуальный режим)</label>
+                    <div class="border border-slate-700 rounded-xl overflow-hidden bg-slate-950">
+                        <!-- Formatting Toolbar -->
+                        <div class="bg-slate-850 border-b border-slate-800 p-2 flex flex-wrap items-center gap-1.5">
+                            <button type="button" onclick="execFormat('formatBlock', 'H2')" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold rounded-lg transition" title="Крупный раздел">Раздел H2</button>
+                            <button type="button" onclick="execFormat('formatBlock', 'H3')" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-lg transition" title="Подраздел">Подраздел H3</button>
+                            <button type="button" onclick="execFormat('formatBlock', 'P')" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs rounded-lg transition" title="Обычный абзац">Абзац</button>
+                            <div class="w-px h-5 bg-slate-700 mx-1"></div>
+                            <button type="button" onclick="execFormat('bold')" class="w-7 h-7 bg-slate-800 hover:bg-slate-700 text-white text-xs font-black rounded-lg transition" title="Жирный">Ж</button>
+                            <button type="button" onclick="execFormat('italic')" class="w-7 h-7 bg-slate-800 hover:bg-slate-700 text-white text-xs italic font-serif rounded-lg transition" title="Курсив">К</button>
+                            <button type="button" onclick="execFormat('insertUnorderedList')" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs rounded-lg transition flex items-center gap-1" title="Маркированный список">
+                                <i class="ph ph-list-bullets"></i> Список
+                            </button>
+                            <div class="w-px h-5 bg-slate-700 mx-1"></div>
+                            <button type="button" onclick="insertWikiLinkPrompt()" class="px-2.5 py-1 bg-indigo-600/30 hover:bg-indigo-600/50 border border-indigo-500/40 text-indigo-300 text-xs font-semibold rounded-lg transition flex items-center gap-1">
+                                <i class="ph ph-link"></i> Ссылка на статью
+                            </button>
+                        </div>
+
+                        <!-- Editable Area -->
+                        <div id="visualEditor" contenteditable="true" data-placeholder="Начните писать текст статьи здесь..."
+                            class="p-4 min-h-[240px] max-h-[400px] overflow-y-auto outline-none text-sm text-slate-200"></div>
+                    </div>
+                </div>
+
+                <!-- Infobox Builder -->
+                <div class="bg-slate-950 border border-slate-800 rounded-xl p-4 space-y-3">
+                    <div class="flex items-center justify-between">
+                        <label class="flex items-center gap-2 text-xs font-bold text-white cursor-pointer">
+                            <input type="checkbox" id="edUseInfobox" checked onchange="toggleInfoboxFields()" class="rounded border-slate-700 bg-slate-900 text-indigo-600">
+                            Карточка-инфобокс справа
+                        </label>
+                        <button type="button" onclick="addInfoboxRow('', '')" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-indigo-300 text-xs font-semibold rounded-lg transition flex items-center gap-1">
+                            <i class="ph ph-plus"></i> Добавить строку
+                        </button>
+                    </div>
+
+                    <div id="edInfoboxContainer" class="space-y-3 pt-1">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <input type="text" id="edInfoboxHeader" placeholder="Заголовок карточки (например: Республика Данорисия)"
+                                class="bg-slate-900 border border-slate-700 text-white rounded-lg px-3 py-1.5 text-xs outline-none">
+                            <select id="edInfoboxIcon" class="bg-slate-900 border border-slate-700 text-slate-200 rounded-lg px-3 py-1.5 text-xs outline-none">
+                                <option value="ph-flag-banner">Иконка: Флаг (Государство)</option>
+                                <option value="ph-buildings">Иконка: Здания (Город)</option>
+                                <option value="ph-bank">Иконка: Колонны (Парламент / Власть)</option>
+                                <option value="ph-shield-chevron">Иконка: Щит (Армия / Организация)</option>
+                                <option value="ph-book-bookmark">Иконка: Книга (История / Закон)</option>
+                                <option value="ph-user-circle">Иконка: Персона</option>
+                            </select>
+                        </div>
+                        <div id="edInfoboxRows" class="space-y-2"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="bg-slate-950 border-t border-slate-800 px-6 py-4 flex items-center justify-between">
+                <button type="button" id="btnDeleteArticle" onclick="deleteCurrentEditingArticle()" class="px-3.5 py-2 bg-red-950/60 hover:bg-red-900/60 text-red-300 border border-red-800/60 text-xs font-semibold rounded-xl transition">
+                    Удалить статью
+                </button>
+                <div class="flex items-center gap-2 ml-auto">
+                    <button type="button" onclick="closeEditor()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold rounded-xl transition">Отмена</button>
+                    <button type="button" onclick="saveVisualArticle()" class="px-5 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-xl shadow-lg shadow-indigo-600/30 transition">
+                        Сохранить статью
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /* WIKI_DATA_START */
+        const defaultWikiArticles = {
+            "danorisiya": {
+                title: "Данорисия",
+                category: "Государства",
+                infobox: {
+                    header: "Республика Данорисия",
+                    icon: "ph-flag-banner",
+                    color: "text-indigo-400",
+                    rows: [
+                        ["Столица", "[[goidagrad|Гойдаград]]"],
+                        ["Форма правления", "Парламентская республика"],
+                        ["Законодательный орган", "[[assembly|Народное Собрание]] (5000 мест)"],
+                        ["Официальный язык", "Русский"]
+                    ]
+                },
+                content: "<p><b>Данорисия</b> — государство с уникальной представительной системой власти. Столицей является город [[goidagrad|Гойдаград]].</p><h2>Государственное устройство</h2><p>Высшим законодательным органом страны является [[assembly|Народное Собрание Данорисии]], включающее в себя <b>5000 депутатов</b>. Визуализировать раскладку мест можно в <a href=\"/parlament\" class=\"wiki-link\">Генераторе парламента</a>.</p>"
+            },
+            "assembly": {
+                title: "Народное Собрание Данорисии",
+                category: "Политика и Власть",
+                infobox: {
+                    header: "Народное Собрание",
+                    icon: "ph-bank",
+                    color: "text-amber-400",
+                    rows: [
+                        ["Страна", "[[danorisiya|Данорисия]]"],
+                        ["Количество мест", "5000 депутатов"],
+                        ["Порог большинства", "2501 место"],
+                        ["Место заседаний", "[[goidagrad|Гойдаград]]"]
+                    ]
+                },
+                content: "<p><b>Народное Собрание</b> — однопалатный парламент [[danorisiya|Данорисии]], состоящий из 5000 депутатов.</p><h2>Состав созыва</h2><ul><li><b>Социал-Демократы:</b> 1450 мест</li><li><b>Левый Фронт:</b> 1200 мест</li><li><b>Консерваторы:</b> 900 мест</li><li><b>Центристы:</b> 800 мест</li><li><b>Зелёные:</b> 350 мест</li><li><b>Националисты:</b> 300 мест</li></ul>"
+            },
+            "goidagrad": {
+                title: "Гойдаград",
+                category: "Города",
+                infobox: {
+                    header: "Город Гойдаград",
+                    icon: "ph-buildings",
+                    color: "text-emerald-400",
+                    rows: [
+                        ["Государство", "[[danorisiya|Данорисия]]"],
+                        ["Статус", "Столица"],
+                        ["Орган власти", "Горсовет Гойдаграда"]
+                    ]
+                },
+                content: "<p><b>Гойдаград</b> — столица [[danorisiya|Республики Данорисия]], её политический и административный центр.</p><h2>Управление</h2><p>Местную власть осуществляет Горсовет Гойдаграда, а также здесь заседает [[assembly|Народное Собрание]].</p>"
+            }
+        };
+        /* WIKI_DATA_END */
+
+        const STORAGE_KEY = 'hoichikov4_wiki_articles_v1';
+        let wikiArticles = JSON.parse(localStorage.getItem(STORAGE_KEY)) || JSON.parse(JSON.stringify(defaultWikiArticles));
+        let currentArticleId = Object.keys(wikiArticles)[0];
+        let editingArticleId = null;
+
+        document.execCommand('defaultParagraphSeparator', false, 'p');
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toastMsg').textContent = msg;
+            toast.classList.remove('translate-y-[-100px]', 'opacity-0');
+            setTimeout(() => toast.classList.add('translate-y-[-100px]', 'opacity-0'), 2600);
+        }
+
+        function parseWikiLinks(htmlString) {
+            return htmlString.replace(/\[\[([^\]|]+)(?:\|([^\]]+))?\]\]/g, (match, targetId, label) => {
+                const cleanId = targetId.trim();
+                const article = wikiArticles[cleanId];
+                const displayText = label ? label.trim() : (article ? article.title : cleanId);
+                if (article) {
+                    return `<a href="#${cleanId}" onclick="openArticle('${cleanId}'); return false;" class="wiki-link">${displayText}</a>`;
+                } else {
+                    return `<span class="wiki-link-red" title="Статья «${cleanId}» ещё не создана">${displayText}</span>`;
+                }
+            });
+        }
+
+        function renderSidebar() {
+            const query = document.getElementById('wikiSearch').value.toLowerCase().trim();
+            const container = document.getElementById('articlesList');
+            const categories = {};
+
+            Object.entries(wikiArticles).forEach(([id, art]) => {
+                if (query && !art.title.toLowerCase().includes(query) && !art.content.toLowerCase().includes(query)) return;
+                const cat = art.category || "Общее";
+                if (!categories[cat]) categories[cat] = [];
+                categories[cat].push({ id, ...art });
+            });
+
+            if (Object.keys(categories).length === 0) {
+                container.innerHTML = `<div class="text-xs text-slate-500 px-2 py-4 text-center">Ничего не найдено</div>`;
+                return;
+            }
+
+            container.innerHTML = Object.entries(categories).map(([catName, items]) => `
+                <div>
+                    <div class="text-[11px] font-semibold text-slate-400 px-2 mb-1 flex items-center justify-between">
+                        <span>${catName}</span>
+                        <span class="text-[10px] text-slate-600 font-mono">${items.length}</span>
+                    </div>
+                    <div class="space-y-0.5">
+                        ${items.map(item => {
+                            const isActive = item.id === currentArticleId;
+                            return `
+                                <a href="#${item.id}" onclick="openArticle('${item.id}'); return false;"
+                                   class="block px-2.5 py-1.5 rounded-lg text-xs transition truncate ${isActive ? 'bg-indigo-600/20 text-indigo-300 font-semibold border border-indigo-500/30' : 'text-slate-300 hover:bg-slate-800/70'}">
+                                    ${item.title}
+                                </a>
+                            `;
+                        }).join('')}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function openArticle(id) {
+            const keys = Object.keys(wikiArticles);
+            if (keys.length === 0) return;
+            const targetId = wikiArticles[id] ? id : keys[0];
+            const art = wikiArticles[targetId];
+
+            currentArticleId = targetId;
+            window.history.replaceState(null, '', '#' + targetId);
+            document.title = `${art.title} — Вики hoichikov4.org`;
+
+            document.getElementById('artTitle').textContent = art.title;
+            document.getElementById('artCategory').textContent = art.category || "Общее";
+            document.getElementById('footerCategory').textContent = art.category || "Общее";
+
+            const infoboxEl = document.getElementById('artInfobox');
+            if (art.infobox && art.infobox.rows && art.infobox.rows.length > 0) {
+                infoboxEl.classList.remove('hidden');
+                document.getElementById('infoboxHeader').textContent = art.infobox.header || art.title;
+                document.getElementById('infoboxBanner').innerHTML = `
+                    <div class="w-16 h-16 rounded-2xl bg-slate-950 border border-slate-800 flex items-center justify-center shadow-inner">
+                        <i class="ph ${art.infobox.icon || 'ph-article'} text-3xl text-indigo-400"></i>
+                    </div>
+                `;
+                document.getElementById('infoboxRows').innerHTML = art.infobox.rows.map(([k, v]) => `
+                    <tr>
+                        <td class="px-3 py-2 font-semibold text-slate-400 bg-slate-900/40 w-2/5 align-top">${k}</td>
+                        <td class="px-3 py-2 text-slate-200 align-top">${parseWikiLinks(v)}</td>
+                    </tr>
+                `).join('');
+            } else {
+                infoboxEl.classList.add('hidden');
+            }
+
+            const bodyEl = document.getElementById('artBody');
+            bodyEl.innerHTML = parseWikiLinks(art.content);
+
+            const headings = bodyEl.querySelectorAll('h2');
+            const tocEl = document.getElementById('artToc');
+            const tocList = document.getElementById('tocList');
+            if (headings.length > 0) {
+                tocEl.classList.remove('hidden');
+                tocList.innerHTML = Array.from(headings).map((h, idx) => {
+                    const anchor = `sec-${idx}`;
+                    h.id = anchor;
+                    return `<li><a href="#${anchor}" onclick="document.getElementById('${anchor}').scrollIntoView({behavior:'smooth'}); return false;" class="hover:underline">${h.textContent}</a></li>`;
+                }).join('');
+            } else {
+                tocEl.classList.add('hidden');
+            }
+
+            renderSidebar();
+        }
+
+        function openRandomArticle() {
+            const keys = Object.keys(wikiArticles);
+            if (keys.length <= 1) return;
+            let nextKey = currentArticleId;
+            while (nextKey === currentArticleId) {
+                nextKey = keys[Math.floor(Math.random() * keys.length)];
+            }
+            openArticle(nextKey);
+        }
+
+        function copyArticleLink() {
+            navigator.clipboard.writeText(window.location.href).then(() => {
+                const btnText = document.getElementById('copyLinkText');
+                btnText.textContent = "Скопировано!";
+                setTimeout(() => btnText.textContent = "Ссылка", 2000);
+            });
+        }
+
+        // =========================================================================
+        // VISUAL EDITOR FUNCTIONS
+        // =========================================================================
+        function transliterateSlug(text) {
+            const map = {'а':'a','б':'b','в':'v','г':'g','д':'d','е':'e','ё':'yo','ж':'zh','з':'z','и':'i','й':'y','к':'k','л':'l','м':'m','н':'n','о':'o','п':'p','р':'r','с':'s','т':'t','у':'u','ф':'f','х':'kh','ц':'ts','ч':'ch','ш':'sh','щ':'shch','ъ':'','ы':'y','ь':'','э':'e','ю':'yu','я':'ya'};
+            return text.toLowerCase().split('').map(c => map[c] !== undefined ? map[c] : c).join('').replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '');
+        }
+
+        function autoSlugify() {
+            if (editingArticleId !== null) return;
+            document.getElementById('edId').value = transliterateSlug(document.getElementById('edTitle').value);
+        }
+
+        function execFormat(cmd, val = null) {
+            document.getElementById('visualEditor').focus();
+            document.execCommand(cmd, false, val);
+        }
+
+        function insertWikiLinkPrompt() {
+            const existingList = Object.entries(wikiArticles).map(([id, a]) => `${id} (${a.title})`).join(', ');
+            const targetId = prompt(`Введите ID статьи для ссылки:\nДоступные: ${existingList}`);
+            if (!targetId) return;
+            const cleanId = targetId.trim();
+            const defaultLabel = wikiArticles[cleanId] ? wikiArticles[cleanId].title : cleanId;
+            const label = prompt('Текст ссылки в статье:', defaultLabel) || defaultLabel;
+
+            document.getElementById('visualEditor').focus();
+            document.execCommand('insertText', false, `[[${cleanId}|${label}]]`);
+        }
+
+        // Очистка лишнего форматирования при вставке текста извне
+        document.getElementById('visualEditor').addEventListener('paste', function(e) {
+            e.preventDefault();
+            const text = (e.originalEvent || e).clipboardData.getData('text/plain');
+            document.execCommand('insertText', false, text);
+        });
+
+        function toggleInfoboxFields() {
+            const enabled = document.getElementById('edUseInfobox').checked;
+            document.getElementById('edInfoboxContainer').classList.toggle('hidden', !enabled);
+        }
+
+        function addInfoboxRow(key = '', val = '') {
+            const container = document.getElementById('edInfoboxRows');
+            const row = document.createElement('div');
+            row.className = 'grid grid-cols-12 gap-2 items-center infobox-edit-row';
+            row.innerHTML = `
+                <input type="text" value="${key.replace(/"/g, '&quot;')}" placeholder="Поле (Столица)" class="col-span-5 bg-slate-900 border border-slate-700 text-slate-200 rounded-lg px-2.5 py-1.5 text-xs outline-none row-key">
+                <input type="text" value="${val.replace(/"/g, '&quot;')}" placeholder="Значение ([[goidagrad|Гойдаград]])" class="col-span-6 bg-slate-900 border border-slate-700 text-slate-200 rounded-lg px-2.5 py-1.5 text-xs outline-none row-val">
+                <button type="button" onclick="this.parentElement.remove()" class="col-span-1 text-slate-500 hover:text-red-400 flex justify-center"><i class="ph ph-trash text-base"></i></button>
+            `;
+            container.appendChild(row);
+        }
+
+        function openEditor(id) {
+            editingArticleId = id;
+            const modal = document.getElementById('editorModal');
+            const rowsContainer = document.getElementById('edInfoboxRows');
+            rowsContainer.innerHTML = '';
+
+            if (id && wikiArticles[id]) {
+                const art = wikiArticles[id];
+                document.getElementById('editorModalTitle').textContent = `Редактирование: ${art.title}`;
+                document.getElementById('edTitle').value = art.title;
+                document.getElementById('edCategory').value = art.category || '';
+                document.getElementById('edId').value = id;
+                document.getElementById('edId').disabled = true;
+                document.getElementById('visualEditor').innerHTML = art.content;
+                document.getElementById('btnDeleteArticle').classList.remove('hidden');
+
+                if (art.infobox && art.infobox.rows && art.infobox.rows.length > 0) {
+                    document.getElementById('edUseInfobox').checked = true;
+                    document.getElementById('edInfoboxHeader').value = art.infobox.header || art.title;
+                    document.getElementById('edInfoboxIcon').value = art.infobox.icon || 'ph-flag-banner';
+                    art.infobox.rows.forEach(([k, v]) => addInfoboxRow(k, v));
+                } else {
+                    document.getElementById('edUseInfobox').checked = false;
+                }
+            } else {
+                document.getElementById('editorModalTitle').textContent = 'Новая статья';
+                document.getElementById('edTitle').value = '';
+                document.getElementById('edCategory').value = 'Государства';
+                document.getElementById('edId').value = '';
+                document.getElementById('edId').disabled = false;
+                document.getElementById('visualEditor').innerHTML = '<p>Начните вводить текст статьи...</p>';
+                document.getElementById('btnDeleteArticle').classList.add('hidden');
+                document.getElementById('edUseInfobox').checked = true;
+                document.getElementById('edInfoboxHeader').value = '';
+                addInfoboxRow('Столица', '');
+                addInfoboxRow('Население', '');
+            }
+
+            toggleInfoboxFields();
+            modal.classList.remove('hidden');
+        }
+
+        function closeEditor() {
+            document.getElementById('editorModal').classList.add('hidden');
+        }
+
+        function saveVisualArticle() {
+            const title = document.getElementById('edTitle').value.trim();
+            const category = document.getElementById('edCategory').value.trim() || 'Общее';
+            let id = document.getElementById('edId').value.trim() || transliterateSlug(title);
+            const content = document.getElementById('visualEditor').innerHTML.trim();
+
+            if (!title || !id) {
+                showToast('Укажите название статьи');
+                return;
+            }
+
+            let infobox = null;
+            if (document.getElementById('edUseInfobox').checked) {
+                const rows = [];
+                document.querySelectorAll('.infobox-edit-row').forEach(rowEl => {
+                    const k = rowEl.querySelector('.row-key').value.trim();
+                    const v = rowEl.querySelector('.row-val').value.trim();
+                    if (k && v) rows.push([k, v]);
+                });
+                if (rows.length > 0) {
+                    infobox = {
+                        header: document.getElementById('edInfoboxHeader').value.trim() || title,
+                        icon: document.getElementById('edInfoboxIcon').value,
+                        rows: rows
+                    };
+                }
+            }
+
+            wikiArticles[id] = { title, category, infobox, content };
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(wikiArticles));
+
+            closeEditor();
+            openArticle(id);
+            showToast('Статья сохранена! Нажмите «Скачать для GitHub» для публикации');
+        }
+
+        function deleteCurrentEditingArticle() {
+            if (!editingArticleId || Object.keys(wikiArticles).length <= 1) {
+                showToast('Нельзя удалить последнюю статью');
+                return;
+            }
+            if (!confirm(`Удалить статью «${wikiArticles[editingArticleId].title}»?`)) return;
+            delete wikiArticles[editingArticleId];
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(wikiArticles));
+            closeEditor();
+            openArticle(Object.keys(wikiArticles)[0]);
+            showToast('Статья удалена');
+        }
+
+        // Генерация и скачивание готового HTML-файла с вшитыми статьями для GitHub
+        function exportUpdatedHtmlFile() {
+            const clone = document.documentElement.cloneNode(true);
+            clone.querySelector('#artBody').innerHTML = '';
+            clone.querySelector('#articlesList').innerHTML = '';
+            clone.querySelector('#infoboxRows').innerHTML = '';
+            clone.querySelector('#tocList').innerHTML = '';
+            clone.querySelector('#editorModal').classList.add('hidden');
+
+            let html = '<!DOCTYPE html>\n' + clone.outerHTML;
+            const dataMarkerRegex = /\/\* WIKI_DATA_START \*\/[\s\S]*?\/\* WIKI_DATA_END \*\//;
+            const newDataBlock = `/* WIKI_DATA_START */\n        const defaultWikiArticles = ${JSON.stringify(wikiArticles, null, 4)};\n        /* WIKI_DATA_END */`;
+            html = html.replace(dataMarkerRegex, newDataBlock);
+
+            const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'index.html';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            showToast('Файл index.html скачан — загрузите его в папку wiki/ на GitHub');
+        }
+
+        window.onload = function() {
+            const hashId = window.location.hash.replace('#', '').trim();
+            openArticle(hashId && wikiArticles[hashId] ? hashId : Object.keys(wikiArticles)[0]);
+        };
+    </script>
+</body>
+</html>
