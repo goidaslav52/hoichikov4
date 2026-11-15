@@ -60,7 +60,7 @@ function createMediaCard(item) {
     img.src = item.url;
     img.alt = item.caption || "Изображение из медиатеки";
     img.loading = "lazy";
-    img.className = "w-full h-full object-cover";
+    img.className = "w-full h-full object-cover cursor-zoom-in";
     frame.appendChild(img);
   }
 
@@ -103,9 +103,61 @@ function renderMediaLibrary(activeFilter = "all") {
   applyActiveFilter(activeFilter);
 }
 
+function setupLightbox() {
+  const modal = document.getElementById("lightboxModal");
+  const modalImg = document.getElementById("lightboxImg");
+  const modalCaption = document.getElementById("lightboxCaption");
+  const modalLink = document.getElementById("lightboxOriginalLink");
+  const closeBtn = document.getElementById("lightboxClose");
+  const grid = document.getElementById("external-media-grid");
+
+  if (!modal || !modalImg || !modalCaption || !grid) return;
+
+  function closeLightbox() {
+    modal.classList.add("hidden");
+    modalImg.src = "";
+    modalImg.alt = "";
+  }
+
+  grid.addEventListener("click", (event) => {
+    const img = event.target.closest("img");
+    if (!img) return;
+
+    const card = img.closest(".media-card");
+    const titleEl = card ? card.querySelector(".media-title") : null;
+    const captionText = (titleEl && titleEl.textContent) || img.alt || "Изображение";
+
+    modalImg.src = img.src;
+    modalImg.alt = captionText;
+    modalCaption.textContent = captionText;
+    if (modalLink) {
+      modalLink.href = img.src;
+    }
+
+    modal.classList.remove("hidden");
+  });
+
+  if (closeBtn) {
+    closeBtn.addEventListener("click", closeLightbox);
+  }
+
+  modal.addEventListener("click", (event) => {
+    if (event.target === modal) {
+      closeLightbox();
+    }
+  });
+
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && !modal.classList.contains("hidden")) {
+      closeLightbox();
+    }
+  });
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   let currentFilter = "all";
   renderMediaLibrary(currentFilter);
+  setupLightbox();
 
   const filterButtons = document.querySelectorAll(".filter-btn");
   filterButtons.forEach((btn) => {
