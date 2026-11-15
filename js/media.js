@@ -1,7 +1,13 @@
 const MEDIA_STORAGE_KEY = "hoichikov4_media_custom_v1";
 
-// Базовые записи по внешним ссылкам (видны всем посетителям сайта)
+// Записи, которые видят все посетители сайта
 const DEFAULT_MEDIA_ITEMS = [
+  {
+    id: "custom-1794773263122",
+    url: "https://i.postimg.cc/zy3tN4RY/photo-2026-11-15-22-05-40.jpg",
+    type: "photo",
+    caption: "Гои"
+  },
   {
     id: "default-1",
     url: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=900&q=80",
@@ -36,35 +42,37 @@ function getAllItems() {
 
 function createMediaCard(item) {
   const figure = document.createElement("figure");
-  figure.className = "media-card";
+  figure.className = "media-card bg-slate-950 border border-slate-800 rounded-xl overflow-hidden flex flex-col";
   figure.dataset.type = item.type === "video" ? "video" : "photo";
 
   const frame = document.createElement("div");
-  frame.className = "media-frame";
+  frame.className = "media-frame aspect-video bg-slate-900 overflow-hidden";
 
   if (item.type === "video") {
     const video = document.createElement("video");
     video.src = item.url;
     video.controls = true;
     video.preload = "metadata";
+    video.className = "w-full h-full object-cover";
     frame.appendChild(video);
   } else {
     const img = document.createElement("img");
     img.src = item.url;
     img.alt = item.caption || "Изображение из медиатеки";
     img.loading = "lazy";
+    img.className = "w-full h-full object-cover";
     frame.appendChild(img);
   }
 
   const caption = document.createElement("figcaption");
-  caption.className = "media-caption";
+  caption.className = "media-caption p-3.5 flex flex-col gap-1";
 
   const title = document.createElement("span");
-  title.className = "media-title";
+  title.className = "media-title font-semibold text-sm text-white";
   title.textContent = item.caption;
 
   const badge = document.createElement("span");
-  badge.className = "media-meta";
+  badge.className = "media-meta text-xs text-slate-400";
   badge.textContent = item.type === "video" ? "Видео" : "Фото";
 
   caption.append(title, badge);
@@ -99,7 +107,6 @@ document.addEventListener("DOMContentLoaded", () => {
   let currentFilter = "all";
   renderMediaLibrary(currentFilter);
 
-  // Фильтры: Все / Фото / Видео
   const filterButtons = document.querySelectorAll(".filter-btn");
   filterButtons.forEach((btn) => {
     btn.addEventListener("click", () => {
@@ -109,7 +116,6 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
-  // Добавление новой карточки по ссылке
   const form = document.getElementById("add-media-form");
   if (form) {
     form.addEventListener("submit", (event) => {
@@ -139,7 +145,6 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // Кнопка очистки только локальных карточек из браузера
   const clearBtn = document.getElementById("clear-local-media");
   if (clearBtn) {
     clearBtn.addEventListener("click", () => {
